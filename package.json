@@ -1,0 +1,22 @@
+{
+  "name": "eventmanager-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/h4ll0w0rld/Eventmanager-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/h4ll0w0rld/Eventmanager-Backend/issues"
+  },
+  "homepage": "https://github.com/h4ll0w0rld/Eventmanager-Backend#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
