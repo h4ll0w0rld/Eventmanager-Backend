@@ -12,11 +12,20 @@ const PORT = 3000
 //set up database connection
 const db = mysql.createConnection({
     host: config.database.host,
+    port: config.database.port,
     user: config.database.user,
     password: config.database.password,
     database: config.database.name
 });
 
+
+//connect to database
+db.connect((err) => {
+    if (err) {
+        throw err;
+    }
+    console.log('Connected to database');
+});
 
 
 app.get('/', (req, res) => {
