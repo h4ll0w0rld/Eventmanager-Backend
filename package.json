@@ -18,6 +18,7 @@
   "homepage": "https://github.com/h4ll0w0rld/Eventmanager-Backend#readme",
   "dependencies": {
     "express": "^4.18.2",
+    "mysql": "^2.18.1",
     "nodemon": "^2.0.22"
   }
 }

@@ -1,8 +1,23 @@
 console.log("Hi i am alive")
+
+
+//require config.js fpr database connection
+const config = require('./config');
+const mysql = require('mysql');
 const express = require('express')
 
 const app = express()
 const PORT = 3000
+
+//set up database connection
+const db = mysql.createConnection({
+    host: config.database.host,
+    user: config.database.user,
+    password: config.database.password,
+    database: config.database.name
+});
+
+
 
 app.get('/', (req, res) => {
     res.send('hello world')
