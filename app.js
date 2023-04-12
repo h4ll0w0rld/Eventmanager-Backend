@@ -38,11 +38,14 @@ app.get('/', (req, res) => {
 
 app.get('/shift', (req, res) => {
 
+    //get every shift 
     db.query('Select * from Shift;', (err, rows) => {
 
         if (err) throw err
 
         console.log(rows)
+
+        //responde all shifts
         res.send({
             rows
          }
