@@ -15,3 +15,7 @@ Type the following command to run nodemon and the ExpressServer
 ```shell
 npm start
 ```
+
+
+## Database configuration
+The database settings are set in the config.js file.
