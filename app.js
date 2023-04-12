@@ -24,8 +24,11 @@ db.connect((err) => {
     if (err) {
         throw err;
     }
-    console.log('Connected to database');
+    console.log(`Connected to database: ${config.database.name}`);
 });
+
+
+
 
 
 app.get('/', (req, res) => {
@@ -33,15 +36,24 @@ app.get('/', (req, res) => {
 })
 
 
-app.get('/user', (req, res) => {
-    res.send({
-        company: "none",
-        name: "nils",
-        age: 24
-    }
+app.get('/shift', (req, res) => {
 
-    )
+    db.query('Select * from Shift;', (err, rows) => {
+
+        if (err) throw err
+
+        console.log(rows)
+        res.send({
+            rows
+         }
+    
+        )
+
+    })
+   
 })
+
+
 
 app.listen(PORT, () => console.log(`Hello world app listening on port ${PORT}!`))
 
