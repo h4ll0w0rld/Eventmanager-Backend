@@ -19,3 +19,10 @@ npm start
 
 ## Database configuration
 The database settings are set in the config.js file.
+
+## API-routes
+all Routes are configured in ./routes/routes.js
+
+## controller
+every interaction with the requests are handled in the ./controllers/controller.js.
+In this file every database operation will take place.
