@@ -1,30 +1,11 @@
 import express from 'express';
 import routes from './src/routes/routes';
 import bodyParser from 'body-parser';
+import { sequelize } from './src/controllers/controller';
 
 
 const app = express();
 const PORT = 3000;
-
-
-// // sets up the database connection
-// export const sequelize = new Sequelize(
-//     config.database.name,
-//     config.database.user,
-//     config.database.password,
-//     {
-//         host: config.database.host,
-//         port: config.database.port,
-//         dialect: "mysql",
-//     }
-// );
-
-// //connects to the database
-// sequelize.authenticate().then(() => {
-//     console.log('Connection has been established successfully.');
-// }).catch((error) => {
-//     console.error('Unable to connect to the database: ', error);
-// });
 
 
 //bodyparser setup
@@ -33,6 +14,24 @@ app.use(bodyParser.json());
 
 // runs routes.js
 routes(app);
+
+//close database connection on shutdown
+const shutdown = () => {
+    console.log('Closing database connection');
+    sequelize.close()
+        .then(() => {
+            console.log('Database connection closed');
+            process.exit(0);
+        })
+        .catch((err) => {
+            console.log('Error closing database connection', err);
+            process.exit(1);
+        });
+};
+
+// run shutdown on SIGINT and SIGTERM (e.g nodemon restart)
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);
 
 
 //default request

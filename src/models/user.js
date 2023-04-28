@@ -1,30 +1,23 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('Event', {
+    return sequelize.define('User', {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
             autoIncrement: true
         },
-        name: {
+        firstName: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        description: {
+        lastName: {
             type: DataTypes.STRING,
-            allowNull: true
-        },
-        startDate: {
-            type: DataTypes.DATE,
             allowNull: false
         },
-        endDate: {
-            type: DataTypes.DATE,
-            allowNull: false
-        },
-        location: {
+        emailAddress: {
             type: DataTypes.STRING,
-            allowNull: true
+            isEmail: true,
+            allowNull: false
         },
     })
 }

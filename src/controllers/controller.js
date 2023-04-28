@@ -1,13 +1,16 @@
 import Sequelize from 'sequelize';
 import config from '../../config';
-// import sequelize from "../../server";
 
 //importing models
 import ShiftModel from "../models/shift";
 import EventModel from "../models/event";
+import UserModel from "../models/user";
+import ShiftCategoryModel from "../models/shift_category";
+import StatusModel from "../models/status";
+import ActivityModel from "../models/activity";
 
 // sets up the database connection
-const sequelize = new Sequelize(
+export const sequelize = new Sequelize(
     config.database.name,
     config.database.user,
     config.database.password,
@@ -15,6 +18,9 @@ const sequelize = new Sequelize(
         host: config.database.host,
         port: config.database.port,
         dialect: "mysql",
+        define: {
+            timestamps: false
+        },
     }
 );
 
@@ -29,39 +35,165 @@ sequelize.authenticate().then(() => {
 /** Database-Setup **/
 //Models/tables
 const Event = EventModel(sequelize, Sequelize);
+const User = UserModel(sequelize, Sequelize);
 const Shift = ShiftModel(sequelize, Sequelize);
+const Shift_Category = ShiftCategoryModel(sequelize, Sequelize);
+const Status = StatusModel(sequelize, Sequelize);
+const Activity = ActivityModel(sequelize, Sequelize);
 
 
-// TODO Relations
-// Event.hasMany(Shift);
+//  Relations
+Event.hasMany(Shift, {
+    onDelete: 'cascade',
+    foreignKey: {
+        allowNull: false
+    }
+});
+Event.hasMany(Shift_Category, {
+    onDelete: 'cascade',
+    foreignKey: {
+        allowNull: false
+    }
+});
+
+Shift.hasMany(Activity, {
+    onDelete: 'cascade',
+    foreignKey: {
+        allowNull: false
+    }
+});
+
+User.hasMany(Activity, {
+    onDelete: 'restrict',
+    foreignKey: {
+        allowNull: true
+    }
+});
+
+Status.hasMany(Activity, {
+    onDelete: 'restrict',
+    foreignKey: {
+        allowNull: false
+    }
+});
+
+Shift_Category.hasMany(Activity, {
+    onDelete: 'cascade',
+    foreignKey: {
+        allowNull: false
+    }
+}
+);
 
 
 //syncs the database
-sequelize.sync()
-    .then(() => {
-        console.log(`Database & tables created!`)
-    }).catch((error) => {
-        console.log(`Error creating database & tables!`)
-    });
+const sync_database_structure = (force) => {
+    sequelize.sync({ force: force })
+        .then(() => {
+            console.log(`Database & tables created!`)
+        }).catch((error) => {
+            console.log(`Error creating database & tables!`, error)
+        });
+};
+
+// NOTE set to true to replace the database
+const replace_database = false;
+// NOTE comment out to prevent database from being synced
+// sync_database_structure(replace_database);
+
+
 
 
 
 /** 
  * 
- * Controller-Functions 
+ * ****************   Controller-Functions ****************
  * 
  * **/
 
-/**** SHIFTS ****/
+
+/**************** Events  ****************/
+
+//GET all events
+export const getAllEvents = (req, res) => {
+    Event.findAll().then((events) => {
+        res.json(events);
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+//GET event by id
+export const getEventById = (req, res) => {
+    Event.findByPk(req.params.id).then((event) => {
+        res.json(event);
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+//POST a new event
+
+export const addNewEvent = (req, res) => {
+    // Add a new Event with sequelize
+    Event.create({
+        name: req.body.name,
+        description: req.body.description,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        location: req.body.location,
+    }).then((event) => {
+        res.status(200).json({ msg: "added successfully a event" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+//EDIT excisting event
+
+export const editEvent = (req, res) => {
+    Event.update({
+        name: req.body.name,
+        description: req.body.description,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        location: req.body.location,
+    }, { where: { id: req.params.id } }).then((event) => {
+        res.status(200).json({ msg: "updated successfully a event" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+//DELETE event by id
+
+export const deleteEvent = (req, res) => {
+    Event.destroy({ where: { id: req.params.id } }).then((event) => {
+        res.status(200).json({ msg: "deleted successfully a event" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+
+
+
+
+/************* SHIFTS *************/
+
+
 
 //GET all shifts
-// export const getAllShifts = (req, res) => {
-//     db.query('Select * from Shift;', (err, data) => {
-//         if (err) throw err;
-//         res.json(data);
-//     });
-// }
-
 export const getAllShifts = (req, res) => {
     Shift.findAll().then((shifts) => {
         res.json(shifts);
@@ -71,29 +203,58 @@ export const getAllShifts = (req, res) => {
             res.status(500).json({ msg: "error", details: err });
         });
 }
+
+//GET shift by id
+export const getShiftById = (req, res) => {
+    Shift.findByPk(req.params.id).then((shift) => {
+        res.json(shift);
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
 //POST a new shift
 export const addNewShift = (req, res) => {
-    db.query('INSERT INTO Shift (startTime, endTime) VALUES (?,?);', [req.body.startTime, req.body.endTime], (err, data) => {
-        if (err) throw err;
-        res.json(data);
-    });
+    // Add a new Shift with sequelize
+    Shift.create({
+        startTime: req.body.startTime,
+        endTime: req.body.endTime,
+        EventId: req.body.EventId,
+    }).then((shift) => {
+        res.status(200).json({ msg: "added successfully a shift" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
 }
 
 
 //EDIT excisting shift
 export const editShift = (req, res) => {
-    db.query('UPDATE Shift SET startTime = ?, endTime = ? WHERE idShift = ? ', [req.body.startTime, req.body.endTime, req.params.idShift], (err, data) => {
-        console.log(req.body.startTime, req.body.endTime, req.params.idShift);
-        if (err) throw err;
-        res.json(data);
-    });
+    Shift.update({
+        startTime: req.body.startTime,
+        endTime: req.body.endTime,
+        EventId: req.body.EventId,
+    }, { where: { id: req.params.id } }).then((shift) => {
+        res.status(200).json({ msg: "updated successfully a shift" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
 }
 
 
 //DELETE excisting shift
 export const deleteShift = (req, res) => {
-    db.query('DELETE FROM Shift WHERE idShift = ? ', [req.params.idShift], (err, data) => {
-        if (err) throw err;
-        res.json(data);
-    });
+    Shift.destroy({ where: { id: req.params.id } }).then((shift) => {
+        res.status(200).json({ msg: "deleted successfully a shift" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
 }

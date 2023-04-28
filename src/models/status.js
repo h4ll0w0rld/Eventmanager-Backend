@@ -1,18 +1,14 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('Shift', {
+    return sequelize.define('Status', {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
             autoIncrement: true
         },
-        startTime: {
-            type: DataTypes.INTEGER,
+        name: {
+            type: DataTypes.STRING,
             allowNull: false
         },
-        endTime: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        }
     })
 }
