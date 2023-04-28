@@ -36,6 +36,7 @@ sequelize.authenticate().then(() => {
 //Models/tables
 const Event = EventModel(sequelize, Sequelize);
 const User = UserModel(sequelize, Sequelize);
+const UserEvent = sequelize.define('UserEvent', {});
 const Shift = ShiftModel(sequelize, Sequelize);
 const Shift_Category = ShiftCategoryModel(sequelize, Sequelize);
 const Status = StatusModel(sequelize, Sequelize);
@@ -55,6 +56,10 @@ Event.hasMany(Shift_Category, {
         allowNull: false
     }
 });
+
+//TODO: onDelete: 'cascade'
+Event.belongsToMany(User, { through: UserEvent });
+User.belongsToMany(Event, { through: UserEvent });
 
 Shift.hasMany(Activity, {
     onDelete: 'cascade',
@@ -186,6 +191,68 @@ export const deleteEvent = (req, res) => {
 }
 
 
+/**************** Users  ****************/
+
+//GET user by id
+
+export const getUserById = (req, res) => {
+    User.findByPk(req.params.id).then((user) => {
+        res.json(user);
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+//POST a new user
+
+export const addNewUser = (req, res) => {
+    // Add a new User with sequelize
+    User.create({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        emailAddress: req.body.emailAddress,
+
+    }).then((user) => {
+        res.status(200).json({ msg: "added successfully a user" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+//EDIT excisting user
+
+export const editUser = (req, res) => {
+    User.update({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        emailAddress: req.body.emailAddress,
+    }, { where: { id: req.params.id } }).then((user) => {
+        res.status(200).json({ msg: "updated successfully a user" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+
+//DELETE user by id
+
+export const deleteUser = (req, res) => {
+    User.destroy({ where: { id: req.params.id } }).then((user) => {
+        res.status(200).json({ msg: "deleted successfully a user" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+
 
 
 
@@ -256,5 +323,81 @@ export const deleteShift = (req, res) => {
         .catch(err => {
             console.log(err);
             res.status(500).json({ msg: "error", details: err });
+        });
+}
+
+
+
+/************* SHIFT CATEGORIES *************/
+
+
+
+
+//GET all shift categories
+export const getAllShiftCategories = (req, res) => {
+    Shift_Category.findAll().then((shift_categories) => {
+        res.json(shift_categories);
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+
+}
+
+//GET shift category by id
+export const getShiftCategoryById = (req, res) => {
+    Shift_Category.findByPk(req.params.id).then((shift_category) => {
+        res.json(shift_category);
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+        });
+
+}
+
+//POST a new shift category
+export const addNewShiftCategory = (req, res) => {
+    // Add a new Shift_Category with sequelize
+    Shift_Category.create({
+        name: req.body.name,
+        description: req.body.description,
+        EventId: req.body.EventId,
+    }).then((shift_category) => {
+        res.status(200).json({ msg: "added successfully a shift_category" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+
+        });
+}
+
+//EDIT excisting shift category
+export const editShiftCategory = (req, res) => {
+    Shift_Category.update({
+        name: req.body.name,
+        description: req.body.description,
+        EventId: req.body.EventId,
+    }, { where: { id: req.params.id } }).then((shift_category) => {
+        res.status(200).json({ msg: "updated successfully a shift_category" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+
+        });
+}
+
+//DELETE excisting shift category
+export const deleteShiftCategory = (req, res) => {
+    Shift_Category.destroy({ where: { id: req.params.id } }).then((shift_category) => {
+        res.status(200).json({ msg: "deleted successfully a shift_category" });
+    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ msg: "error", details: err });
+
         });
 }
