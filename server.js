@@ -1,7 +1,7 @@
 import express from 'express';
 import routes from './src/routes/routes';
 import bodyParser from 'body-parser';
-import { sequelize } from './src/controllers/controller';
+import { sequelize } from './src/controllers/sequelize';
 
 
 const app = express();

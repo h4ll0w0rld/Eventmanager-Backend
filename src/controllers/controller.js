@@ -1,112 +1,12 @@
-import Sequelize from 'sequelize';
-import config from '../../config';
+import * as sequelize from './sequelize';
 
-//importing models
-import ShiftModel from "../models/shift";
-import EventModel from "../models/event";
-import UserModel from "../models/user";
-import ShiftCategoryModel from "../models/shift_category";
-import StatusModel from "../models/status";
-import ActivityModel from "../models/activity";
-
-// sets up the database connection
-export const sequelize = new Sequelize(
-    config.database.name,
-    config.database.user,
-    config.database.password,
-    {
-        host: config.database.host,
-        port: config.database.port,
-        dialect: "mysql",
-        define: {
-            timestamps: false
-        },
-    }
-);
-
-//connects to the database
-sequelize.authenticate().then(() => {
-    console.log('Connection has been established successfully.');
-}).catch((error) => {
-    console.error('Unable to connect to the database: ', error);
-});
-
-
-/** Database-Setup **/
-//Models/tables
-const Event = EventModel(sequelize, Sequelize);
-const User = UserModel(sequelize, Sequelize);
-const UserEvent = sequelize.define('UserEvent', {});
-const Shift = ShiftModel(sequelize, Sequelize);
-const Shift_Category = ShiftCategoryModel(sequelize, Sequelize);
-const Status = StatusModel(sequelize, Sequelize);
-const Activity = ActivityModel(sequelize, Sequelize);
-
-
-//  Relations
-Event.hasMany(Shift, {
-    onDelete: 'cascade',
-    foreignKey: {
-        allowNull: false
-    }
-});
-Event.hasMany(Shift_Category, {
-    onDelete: 'cascade',
-    foreignKey: {
-        allowNull: false
-    }
-});
-
-//TODO: onDelete: 'cascade'
-Event.belongsToMany(User, { through: UserEvent });
-User.belongsToMany(Event, { through: UserEvent });
-
-Shift.hasMany(Activity, {
-    onDelete: 'cascade',
-    foreignKey: {
-        allowNull: false
-    }
-});
-
-User.hasMany(Activity, {
-    onDelete: 'restrict',
-    foreignKey: {
-        allowNull: true
-    }
-});
-
-Status.hasMany(Activity, {
-    onDelete: 'restrict',
-    foreignKey: {
-        allowNull: false
-    }
-});
-
-Shift_Category.hasMany(Activity, {
-    onDelete: 'cascade',
-    foreignKey: {
-        allowNull: false
-    }
-}
-);
-
-
-//syncs the database
-const sync_database_structure = (force) => {
-    sequelize.sync({ force: force })
-        .then(() => {
-            console.log(`Database & tables created!`)
-        }).catch((error) => {
-            console.log(`Error creating database & tables!`, error)
-        });
-};
-
-// NOTE set to true to replace the database
-const replace_database = false;
-// NOTE comment out to prevent database from being synced
-// sync_database_structure(replace_database);
-
-
+const Event = sequelize.Event;
+const User = sequelize.User;
+const UserEvent = sequelize.UserEvent;
+const Shift = sequelize.Shift;
+const Shift_Category = sequelize.Shift_Category;
+const Status = sequelize.Status;
+const Activity = sequelize.Activity;
 
 
 
@@ -114,7 +14,7 @@ const replace_database = false;
  * 
  * ****************   Controller-Functions ****************
  * 
- * **/
+ ***/
 
 
 /**************** Events  ****************/
