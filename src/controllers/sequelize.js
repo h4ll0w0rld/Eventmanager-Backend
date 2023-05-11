@@ -2,12 +2,12 @@ import Sequelize from 'sequelize';
 import config from '../../config';
 
 //importing models
-import ShiftModel from "../models/shift";
-import EventModel from "../models/event";
-import UserModel from "../models/user";
-import ShiftCategoryModel from "../models/shift_category";
-import StatusModel from "../models/status";
-import ActivityModel from "../models/activity";
+import ShiftModel from "../models/sequelize/shift";
+import EventModel from "../models/sequelize/event";
+import UserModel from "../models/sequelize/user";
+import ShiftCategoryModel from "../models/sequelize/shift_category";
+import StatusModel from "../models/sequelize/status";
+import ActivityModel from "../models/sequelize/activity";
 
 // sets up the database connection
 export const sequelize = new Sequelize(
