@@ -1,14 +1,16 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('Activity', {
+    const Status = sequelize.define('Status', {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
             autoIncrement: true
         },
-        description: {
+        name: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: false
         },
     })
+
+    return Status
 }

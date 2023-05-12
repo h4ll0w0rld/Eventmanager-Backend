@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('Shift_Category', {
+    const Event = sequelize.define('Event', {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -13,6 +13,20 @@ module.exports = (sequelize, DataTypes) => {
         description: {
             type: DataTypes.STRING,
             allowNull: true
-        }
+        },
+        startDate: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        endDate: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        location: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
     })
+
+    return Event
 }

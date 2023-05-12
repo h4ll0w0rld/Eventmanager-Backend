@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('Shift', {
+    const Shift = sequelize.define('Shift', {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -15,4 +15,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         }
     })
+
+    return Shift
 }

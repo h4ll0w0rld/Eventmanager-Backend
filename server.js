@@ -1,9 +1,14 @@
-import express from 'express';
-import routes from './src/routes/routes';
-import bodyParser from 'body-parser';
-import { sequelize } from './src/controllers/sequelize';
+const express = require('express');
+const bodyParser = require('body-parser');
+const db = require("./src/models");
 
 
+// import error controller
+const errorController = require('./src/controllers/error_controller');
+
+
+
+// initialize express
 const app = express();
 const PORT = 3000;
 
@@ -12,13 +17,40 @@ const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// runs routes.js
-routes(app);
+
+
+// app.use((req, res, next) => {
+//     req.setHeader('Access-Control-Allow-Origin', '*');
+//     req.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+//     req.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+//     next();
+// });
+
+// define route files
+const shiftCategoryRoute = require('./src/routes/shiftCategory_router');
+app.use('/shiftCategory', shiftCategoryRoute);
+
+
+const eventRoute = require('./src/routes/event_router');
+app.use('/event', eventRoute);
+
+const userRoute = require('./src/routes/user_router');
+app.use('/user', userRoute);
+
+const shiftRoute = require('./src/routes/shift_router');
+app.use('/shift', shiftRoute);
+
+const activityRoute = require('./src/routes/activity_router');
+app.use('/activity', activityRoute);
+
+// error handling
+// app.use(errorController.get404);
+// app.use(errorController.get500);
 
 //close database connection on shutdown
 const shutdown = () => {
     console.log('Closing database connection');
-    sequelize.close()
+    db.sequelize.close()
         .then(() => {
             console.log('Database connection closed');
             process.exit(0);
