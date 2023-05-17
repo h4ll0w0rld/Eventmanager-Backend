@@ -5,15 +5,22 @@ const Event = db.event;
 
 
 // GET ALL Events
-const getAllEvents = async (req, res) => {
-    let events = await Event.findAll()
-    res.status(200).send(events)
+const getAllEvents = async (req, res, next) => {
+    try {
+        let events = await Event.findAll()
+        res.status(200).send(events)
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
 }
 
 
 
 // ADD NEW Event
-const addEvent = async (req, res) => {
+const addEvent = async (req, res, next) => {
     let info = {
         name: req.body.name,
         description: req.body.description,
@@ -22,8 +29,15 @@ const addEvent = async (req, res) => {
         location: req.body.location,
         // user_id: req.body.user_id
     }
-    const event = await Event.create(info)
-    res.status(200).send({ message: "successful created new Event", data: event })
+    try {
+        const event = await Event.create(info)
+        res.status(200).send({ message: "successful created new Event", data: event })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
 }
 
 
