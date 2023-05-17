@@ -1,7 +1,11 @@
 const db = require("../models");
-import Shift_Category from "../models/classes/Shift_category";
+const crudController = require("./crud_controller");
+import Shift_Category_class from "../models/classes/Shift_category";
+import Event_class from "../models/classes/Event";
+
 // create main Model
 const ShiftCategory = db.shift_category;
+// create sub Models
 const Shift = db.shift;
 const Activity = db.activity;
 const User = db.user;
@@ -16,6 +20,7 @@ const addShiftCategory = async (req, res, next) => {
         event_id: req.body.event_id
     }
     try {
+        await crudController.getEventById(event_id);
         const shiftCategory = await ShiftCategory.create(info)
         res.status(200).send({ message: "successful created new Category", data: shiftCategory })
     } catch (error) {
@@ -32,7 +37,8 @@ const addShiftCategory = async (req, res, next) => {
 const deleteShiftCategory = async (req, res, next) => {
     let id = req.params.id;
     try {
-        let shiftCategory = await ShiftCategory.destroy({ where: { id: id } })
+        await crudController.getShiftCategoryById(id);
+        await ShiftCategory.destroy({ where: { id: id } });
         res.status(200).send({ message: "successful deleted Shift_Category" })
     } catch (error) {
         if (!error.statusCode) {
@@ -43,16 +49,14 @@ const deleteShiftCategory = async (req, res, next) => {
 }
 
 
+// GET Shift_Category Names by Event
 
-// GET ALL Shift_Categories by Event
-
-const getAllShiftCategories = async (req, res, next) => {
+const getAllShiftCategoryNames = async (req, res, next) => {
     let event_id = req.params.event_id;
     try {
-        let shiftCategories = await ShiftCategory.findAll({ where: { event_id: event_id } })
-        res.status(200).send(shiftCategories)
-    }
-    catch (error) {
+        let shiftCategories = await private_getAllShiftCategoryNames(event_id);
+        res.status(200).send(shiftCategories);
+    } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
@@ -61,12 +65,57 @@ const getAllShiftCategories = async (req, res, next) => {
 }
 
 
-// GET Shift_Category content by ID
 
-const getShiftCategoryById = async (req, res, next) => {
+// GET one Shift_Category content by ID
+
+const getShiftCategoryObjectById = async (req, res, next) => {
     let id = req.params.id;
     try {
-        let shiftCategory = await ShiftCategory.findOne({ where: { id: id } });
+        let shiftCategoryObject = await private_getShiftCategoryObjectById(id);
+        res.status(200).send(shiftCategoryObject);
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+
+// GET all Shift_Category content by Event
+
+const getAllShiftCategoriesByEvent = async (req, res, next) => {
+    let event_id = req.params.event_id;
+    try {
+        let shiftCategoryNames = await private_getAllShiftCategoryNames(event_id);
+        let event = await crudController.getEventById(event_id);
+
+        let shiftCategoryObjects = [];
+        for (let i = 0; i < shiftCategoryNames.length; i++) {
+            let shiftCategoryObject = await private_getShiftCategoryObjectById(shiftCategoryNames[i].id);
+            shiftCategoryObjects.push(shiftCategoryObject);
+        }
+        let eventObject = new Event_class(event, shiftCategoryObjects);
+        res.status(200).send(eventObject);
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+
+
+
+
+/**********  PRIVATE FUNCTIONS  *********/
+
+// GET Shift_Category content by ID
+
+const private_getShiftCategoryObjectById = async (id) => {
+    try {
+        let shiftCategory = await crudController.getShiftCategoryById(id);
         let event_id = shiftCategory.event_id;
         let shifts = await Shift.findAll(
             {
@@ -81,20 +130,48 @@ const getShiftCategoryById = async (req, res, next) => {
                 }],
                 where: { event_id: event_id }
             })
-        let shiftCategoryObject = new Shift_Category(shiftCategory, shifts);
-        res.status(200).send(shiftCategoryObject);
+        let shiftCategoryObject = new Shift_Category_class(shiftCategory, shifts);
+        return shiftCategoryObject;
+
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
-        next(error);
+        throw error;
     }
 }
+
+
+
+
+
+// GET ALL Shift_Categories by Event
+
+const private_getAllShiftCategoryNames = async (event_id) => {
+    try {
+        await crudController.getEventById(event_id);
+        let shiftCategories = await ShiftCategory.findAll({ where: { event_id: event_id } })
+        return shiftCategories;
+
+    }
+    catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        throw error;
+    }
+}
+
+
+
+
+
 
 
 module.exports = {
     addShiftCategory: addShiftCategory,
     deleteShiftCategory: deleteShiftCategory,
-    getAllShiftCategories: getAllShiftCategories,
-    getShiftCategoryById: getShiftCategoryById
+    getAllShiftCategoryNames: getAllShiftCategoryNames,
+    getShiftCategoryById: getShiftCategoryObjectById,
+    getAllShiftCategoriesByEvent: getAllShiftCategoriesByEvent
 }

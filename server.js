@@ -46,6 +46,7 @@ const activityRoute = require('./src/routes/activity_router');
 app.use('/activity', activityRoute);
 
 // error handling
+app.use(errorController.get400);
 app.use(errorController.get404);
 app.use(errorController.get500);
 

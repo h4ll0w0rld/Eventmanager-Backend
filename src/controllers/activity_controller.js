@@ -1,17 +1,30 @@
 const db = require("../models");
+const crudController = require("./crud_controller");
 
 // create main Model
 const Activity = db.activity;
 const User = db.user;
+const Shift = db.shift;
+const ShiftCategory = db.shift_category;
+
 
 // Add new Activity
-const addActivity = async (req, res) => {
+const addActivity = async (req, res, next) => {
     let info = {
         shift_id: req.body.shift_id,
         shift_category_id: req.body.shift_category_id
     }
-    const activity = await Activity.create(info)
-    res.status(200).send({ message: "successful created new Activity", data: activity })
+    try {
+        await crudController.getShiftById(info.shift_id);
+        await crudController.getShiftCategoryById(info.shift_category_id);
+        const activity = await Activity.create(info)
+        res.status(200).send({ message: "successful created new Activity", data: activity })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
 }
 
 
@@ -21,28 +34,15 @@ const addUserToActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     let user_id = req.params.user_id;
     try {
-        let activity = await Activity.findOne(
-            {
-                include: [{
-                    model: User,
-                    as: "user",
-                }],
-                where: { id: activity_id }
-            }
-        );
-
+        let activity = await crudController.getActivityById(activity_id);
         if (activity.user) {
             // if activity already has an user
-            res.status(400).send({ message: "Activity already has an user!" })
+            throw Object.assign(new Error('Activity already has an user!'), { statusCode: 400 });
         } else {
             // if user doesn't exist
-            let user = await User.findOne({ where: { id: user_id } });
-            if (!user) {
-                res.status(404).send({ message: "User not found!" });
-            } else {
-                await activity.update({ user_id: user_id });
-                res.status(200).send({ message: "successful added User to Activity" })
-            }
+            await crudController.getUserById(user_id);
+            await activity.update({ user_id: user_id });
+            res.status(200).send({ message: "successful added User to Activity" })
         }
     } catch (error) {
         if (!error.statusCode) {
@@ -58,8 +58,44 @@ const addUserToActivity = async (req, res, next) => {
 const removeUserFromActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     try {
-        let activity = await Activity.update({ user_id: null }, { where: { id: activity_id } })
+        await crudController.getActivityById(activity_id);
+        await Activity.update({ user_id: null }, { where: { id: activity_id } })
         res.status(200).send({ message: "successful deleted User from Activity" })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+// GET all Activities by User
+
+const getActivitiesByUser = async (req, res, next) => {
+    let user_id = req.params.user_id;
+    let event_id = req.params.event_id;
+    try {
+        await crudController.getUserById(user_id);
+        await crudController.getEventById(event_id);
+        let activities = await Activity.findAll(
+            {
+                include: [
+                    {
+                        model: User,
+                        as: "user"
+                    },
+                    {
+                        model: ShiftCategory,
+                        as: "shift_category"
+                    },
+                    {
+                        model: Shift,
+                        as: "shift"
+                    }
+                ],
+                where: { user_id: user_id }
+            })
+        res.status(200).send(activities);
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -73,16 +109,31 @@ const removeUserFromActivity = async (req, res, next) => {
 
 // GET ALL Activities by Shift_Category
 
-const getActivitiesByShiftCategory = async (req, res) => {
+const getActivitiesByShiftCategory = async (req, res, next) => {
     let shift_category_id = req.params.shift_category_id;
-    let activities = await Activity.findAll({ where: { shift_category_id: shift_category_id } })
-    res.status(200).send(activities)
+    try {
+        await crudController.getShiftCategoryById(shift_category_id);
+        let activities = await Activity.findAll({ where: { shift_category_id: shift_category_id } })
+        res.status(200).send(activities)
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
 }
+
+
+
+
+
+
 
 
 module.exports = {
     addActivity: addActivity,
     addUserToActivity: addUserToActivity,
     removeUserFromActivity: removeUserFromActivity,
+    getActivitiesByUser: getActivitiesByUser,
     getActivitiesByShiftCategory: getActivitiesByShiftCategory
 }
