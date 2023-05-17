@@ -7,11 +7,11 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true
         },
         startTime: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.TIME,
             allowNull: false
         },
         endTime: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.TIME,
             allowNull: false
         }
     })
