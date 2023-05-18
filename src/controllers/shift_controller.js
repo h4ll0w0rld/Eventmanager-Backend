@@ -1,5 +1,5 @@
 const db = require("../models");
-const crudController = require("./crud_controller");
+const baseController = require("./base_controller");
 
 // create main Model
 const Shift = db.shift;
@@ -8,7 +8,7 @@ const Shift = db.shift;
 const getAllShifts = async (req, res, next) => {
     let event_id = req.params.event_id;
     try {
-        await crudController.getEventById(event_id);
+        await baseController.getEventById(event_id);
         let shifts = await Shift.findAll({ where: { event_id: event_id } })
         res.status(200).send(shifts)
     } catch (error) {
@@ -28,7 +28,7 @@ const addShift = async (req, res, next) => {
         event_id: req.body.event_id
     }
     try {
-        await crudController.getEventById(event_id);
+        await baseController.getEventById(event_id);
         const shift = await Shift.create(info)
         res.status(200).send({ message: "successful created new Shift", data: shift })
     } catch (error) {

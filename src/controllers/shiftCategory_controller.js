@@ -1,5 +1,5 @@
 const db = require("../models");
-const crudController = require("./crud_controller");
+const baseController = require("./base_controller");
 import Shift_Category_class from "../models/classes/Shift_category";
 import Event_class from "../models/classes/Event";
 
@@ -20,7 +20,7 @@ const addShiftCategory = async (req, res, next) => {
         event_id: req.body.event_id
     }
     try {
-        await crudController.getEventById(event_id);
+        await baseController.getEventById(event_id);
         const shiftCategory = await ShiftCategory.create(info)
         res.status(200).send({ message: "successful created new Category", data: shiftCategory })
     } catch (error) {
@@ -37,7 +37,7 @@ const addShiftCategory = async (req, res, next) => {
 const deleteShiftCategory = async (req, res, next) => {
     let id = req.params.id;
     try {
-        await crudController.getShiftCategoryById(id);
+        await baseController.getShiftCategoryById(id);
         await ShiftCategory.destroy({ where: { id: id } });
         res.status(200).send({ message: "successful deleted Shift_Category" })
     } catch (error) {
@@ -88,7 +88,7 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
     let event_id = req.params.event_id;
     try {
         let shiftCategoryNames = await private_getAllShiftCategoryNames(event_id);
-        let event = await crudController.getEventById(event_id);
+        let event = await baseController.getEventById(event_id);
 
         let shiftCategoryObjects = [];
         for (let i = 0; i < shiftCategoryNames.length; i++) {
@@ -115,7 +115,7 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
 
 const private_getShiftCategoryObjectById = async (id) => {
     try {
-        let shiftCategory = await crudController.getShiftCategoryById(id);
+        let shiftCategory = await baseController.getShiftCategoryById(id);
         let event_id = shiftCategory.event_id;
         let shifts = await Shift.findAll(
             {
@@ -149,7 +149,7 @@ const private_getShiftCategoryObjectById = async (id) => {
 
 const private_getAllShiftCategoryNames = async (event_id) => {
     try {
-        await crudController.getEventById(event_id);
+        await baseController.getEventById(event_id);
         let shiftCategories = await ShiftCategory.findAll({ where: { event_id: event_id } })
         return shiftCategories;
 

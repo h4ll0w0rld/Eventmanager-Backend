@@ -1,5 +1,5 @@
 const db = require("../models");
-const crudController = require("./crud_controller");
+const baseController = require("./base_controller");
 
 // create main Model
 const User = db.user;
@@ -8,7 +8,7 @@ const User = db.user;
 const getUserById = async (req, res, next) => {
     let id = req.params.id;
     try {
-        let user = await crudController.getUserById(id);
+        let user = await baseController.getUserById(id);
         res.status(200).send(user)
     } catch (error) {
         if (!error.statusCode) {

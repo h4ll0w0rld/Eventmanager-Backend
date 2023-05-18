@@ -1,5 +1,5 @@
 const db = require("../models");
-const crudController = require("./crud_controller");
+const crudController = require("./base_controller");
 
 // create main Model
 const Activity = db.activity;
