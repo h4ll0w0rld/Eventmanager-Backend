@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require("./src/models");
+const cors = require('cors');
 
 
 // import error controller
@@ -17,7 +18,14 @@ const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+const corsOptions = {
+    origin: '*', // Specify the allowed origin(s)
+    methods: ['GET', 'POST'], // Specify the allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Specify the allowed headers
+  };
+app.use(cors(corsOptions))
 
+app.options('*', cors());
 
 
 
