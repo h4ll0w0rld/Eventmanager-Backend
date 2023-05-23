@@ -17,12 +17,21 @@ npm start
 ```
 
 
-## Database configuration
-The database settings are set in the config.js file.
+## Database
+
+### Database information
+
+The database config informations are set in the ./config/config.js file.
+
+### Database configuration
+
+The databse setup is made in `./src/models/index.js`
+
+The schema files are in `./src/models/sequelize_models/*`
+
 
 ## API-routes
-all Routes are configured in ./routes/routes.js
+all Routes are configured in `./routes/routes.js`
 
 ## controller
-every interaction with the requests are handled in the ./controllers/controller.js.
-In this file every database operation will take place.
+every interaction with the requests are handled in the controllers `./controller/*`
