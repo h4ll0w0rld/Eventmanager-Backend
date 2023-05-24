@@ -6,10 +6,10 @@ const Shift = db.shift;
 
 // GET ALL Shifts from Event
 const getAllShifts = async (req, res, next) => {
-    let event_id = req.params.event_id;
+    let shift_category_id = req.params.shift_category_id;
     try {
-        await baseController.getEventById(event_id);
-        let shifts = await Shift.findAll({ where: { event_id: event_id } })
+        await baseController.getShiftCategoryById(shift_category_id);
+        let shifts = await Shift.findAll({ where: { shift_category_id: shift_category_id } })
         res.status(200).send(shifts)
     } catch (error) {
         if (!error.statusCode) {
@@ -25,10 +25,10 @@ const addShift = async (req, res, next) => {
     let info = {
         startTime: req.body.startTime,
         endTime: req.body.endTime,
-        event_id: req.body.event_id
+        shift_category_id: req.body.shift_category_id
     }
     try {
-        await baseController.getEventById(info.event_id);
+        await baseController.getShiftCategoryById(info.shift_category_id);
         const shift = await Shift.create(info)
         res.status(200).send({ message: "successful created new Shift", data: shift })
     } catch (error) {

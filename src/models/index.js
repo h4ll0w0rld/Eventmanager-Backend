@@ -11,6 +11,7 @@ const sequelize = new Sequelize(
         host: dbConfig.HOST,
         port: dbConfig.PORT,
         dialect: dbConfig.DIALECT,
+        timezone: dbConfig.TIMEZONE,
         define: {
             timestamps: false
         }
@@ -48,23 +49,6 @@ db.sequelize.sync({ force: false })
 
 
 //  Relations
-db.event.hasMany(db.shift, {
-    onDelete: 'cascade',
-    foreignKey: {
-        name: 'event_id',
-        allowNull: false
-    },
-    as: 'shifts'
-});
-
-db.shift.belongsTo(db.event, {
-    foreignKey: {
-        name: 'event_id',
-        allowNull: false
-    },
-    as: 'event'
-});
-
 
 
 db.event.hasMany(db.shift_category, {
@@ -82,6 +66,23 @@ db.shift_category.belongsTo(db.event, {
         allowNull: false
     },
     as: 'event'
+});
+
+db.shift_category.hasMany(db.shift, {
+    onDelete: 'cascade',
+    foreignKey: {
+        name: 'shift_category_id',
+        allowNull: false
+    },
+    as: 'shifts'
+});
+
+db.shift.belongsTo(db.shift_category, {
+    foreignKey: {
+        name: 'shift_category_id',
+        allowNull: false
+    },
+    as: 'shift_category'
 });
 
 //TODO: onDelete: 'cascade'
@@ -139,24 +140,6 @@ db.activity.belongsTo(db.user, {
 //     },
 //     as: 'status'
 // });
-
-db.shift_category.hasMany(db.activity, {
-    onDelete: 'cascade',
-    foreignKey: {
-        name: 'shift_category_id',
-        allowNull: false
-    },
-    as: 'activities'
-}
-);
-
-db.activity.belongsTo(db.shift_category, {
-    foreignKey: {
-        name: 'shift_category_id',
-        allowNull: false
-    },
-    as: 'shift_category'
-});
 
 
 module.exports = db;

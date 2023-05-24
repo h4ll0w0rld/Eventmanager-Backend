@@ -4,5 +4,6 @@ module.exports = {
     PASSWORD: 'Projektle2023!',
     DB: 'testDB',
     PORT: 3306,
-    DIALECT: 'mysql'
+    DIALECT: 'mysql',
+    TIMEZONE: '-02:00'
 };

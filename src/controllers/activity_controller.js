@@ -12,11 +12,9 @@ const ShiftCategory = db.shift_category;
 const addActivity = async (req, res, next) => {
     let info = {
         shift_id: req.body.shift_id,
-        shift_category_id: req.body.shift_category_id
     }
     try {
         await baseController.getShiftById(info.shift_id);
-        await baseController.getShiftCategoryById(info.shift_category_id);
         const activity = await Activity.create(info)
         res.status(200).send({ message: "successful created new Activity", data: activity })
     } catch (error) {
@@ -85,12 +83,12 @@ const getActivitiesByUser = async (req, res, next) => {
                         as: "user"
                     },
                     {
-                        model: ShiftCategory,
-                        as: "shift_category"
-                    },
-                    {
                         model: Shift,
-                        as: "shift"
+                        as: "shift",
+                        include: [{
+                            model: ShiftCategory,
+                            as: "shift_category"
+                        }]
                     }
                 ],
                 where: { user_id: user_id }
@@ -113,7 +111,16 @@ const getActivitiesByShiftCategory = async (req, res, next) => {
     let shift_category_id = req.params.shift_category_id;
     try {
         await baseController.getShiftCategoryById(shift_category_id);
-        let activities = await Activity.findAll({ where: { shift_category_id: shift_category_id } })
+        let activities = await Activity.findAll({
+            include: [
+                {
+                    model: Shift,
+                    as: "shift",
+                    where: { shift_category_id: shift_category_id },
+                }
+            ]
+        }
+        )
         res.status(200).send(activities)
     } catch (error) {
         if (!error.statusCode) {
