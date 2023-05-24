@@ -1,5 +1,5 @@
 const db = require("../models");
-const baseContrreoller = require("./base_controller");
+const baseController = require("./base_controller");
 
 // create main Model
 const Activity = db.activity;

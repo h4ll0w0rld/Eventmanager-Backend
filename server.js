@@ -18,23 +18,17 @@ const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+
+//cors setups
 const corsOptions = {
     origin: '*', // Specify the allowed origin(s)
-    methods: ['GET', 'POST'], // Specify the allowed HTTP methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify the allowed HTTP methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Specify the allowed headers
-  };
+};
 app.use(cors(corsOptions))
 
 app.options('*', cors());
 
-
-
-// app.use((req, res, next) => {
-//     req.setHeader('Access-Control-Allow-Origin', '*');
-//     req.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-//     req.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//     next();
-// });
 
 // define route files
 const shiftCategoryRoute = require('./src/routes/shiftCategory_router');

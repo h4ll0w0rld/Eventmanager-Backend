@@ -20,7 +20,7 @@ const addShiftCategory = async (req, res, next) => {
         event_id: req.body.event_id
     }
     try {
-        await baseController.getEventById(event_id);
+        await baseController.getEventById(info.event_id);
         const shiftCategory = await ShiftCategory.create(info)
         res.status(200).send({ message: "successful created new Category", data: shiftCategory })
     } catch (error) {

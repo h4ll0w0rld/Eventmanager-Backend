@@ -28,7 +28,7 @@ const addShift = async (req, res, next) => {
         event_id: req.body.event_id
     }
     try {
-        await baseController.getEventById(event_id);
+        await baseController.getEventById(info.event_id);
         const shift = await Shift.create(info)
         res.status(200).send({ message: "successful created new Shift", data: shift })
     } catch (error) {
