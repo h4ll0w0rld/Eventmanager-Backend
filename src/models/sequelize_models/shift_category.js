@@ -15,7 +15,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         intervall: {
-            type: DataTypes.TIME,
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        activitiesPerShift: {
+            type: DataTypes.INTEGER,
             allowNull: false
         }
     })

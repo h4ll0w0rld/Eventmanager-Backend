@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/all/shift_category_id/:shift_category_id', shiftController.getAllShifts);
-router.post('/add', shiftController.addShift);
+router.get('/ShiftsByUser/user_id/:user_id/event_id/:event_id', shiftController.getShiftsByUserAndEvent);
+
 
 module.exports = router;

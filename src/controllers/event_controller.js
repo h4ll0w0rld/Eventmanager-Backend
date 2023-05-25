@@ -1,5 +1,7 @@
 const db = require("../models");
 
+const validationService = require("../services/validation_service");
+
 // create main Model
 const Event = db.event;
 
@@ -7,7 +9,11 @@ const Event = db.event;
 // GET ALL Events
 const getAllEvents = async (req, res, next) => {
     try {
-        let events = await Event.findAll()
+        let events = await Event.findAll(
+            {
+                order: [['name', 'ASC']],
+            }
+        )
         res.status(200).send(events)
     } catch (error) {
         if (!error.statusCode) {
@@ -30,6 +36,7 @@ const addEvent = async (req, res, next) => {
         // user_id: req.body.user_id
     }
     try {
+        await validationService.isAddEventValid(info);
         const event = await Event.create(info)
         res.status(200).send({ message: "successful created new Event", data: event })
     } catch (error) {

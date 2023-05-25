@@ -1,5 +1,5 @@
 const db = require("../models");
-const baseController = require("./base_controller");
+const validationService = require("../services/validation_service");
 
 // create main Model
 const Activity = db.activity;
@@ -14,7 +14,7 @@ const addActivity = async (req, res, next) => {
         shift_id: req.body.shift_id,
     }
     try {
-        await baseController.getShiftById(info.shift_id);
+        await validationService.isShiftIDValid(info.shift_id);
         const activity = await Activity.create(info)
         res.status(200).send({ message: "successful created new Activity", data: activity })
     } catch (error) {
@@ -32,13 +32,13 @@ const addUserToActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     let user_id = req.params.user_id;
     try {
-        let activity = await baseController.getActivityById(activity_id);
+        let activity = await validationService.isActivityIDValid(activity_id);
         if (activity.user) {
             // if activity already has an user
             throw Object.assign(new Error('Activity already has an user!'), { statusCode: 400 });
         } else {
             // if user doesn't exist
-            await baseController.getUserById(user_id);
+            await validationService.isUserIDValid(user_id);
             await activity.update({ user_id: user_id });
             res.status(200).send({ message: "successful added User to Activity" })
         }
@@ -56,44 +56,9 @@ const addUserToActivity = async (req, res, next) => {
 const removeUserFromActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     try {
-        await baseController.getActivityById(activity_id);
+        await validationService.isActivityIDValid(activity_id);
         await Activity.update({ user_id: null }, { where: { id: activity_id } })
         res.status(200).send({ message: "successful deleted User from Activity" })
-    } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
-    }
-}
-
-// GET all Activities by User
-
-const getActivitiesByUser = async (req, res, next) => {
-    let user_id = req.params.user_id;
-    let event_id = req.params.event_id;
-    try {
-        await baseController.getUserById(user_id);
-        await baseController.getEventById(event_id);
-        let activities = await Activity.findAll(
-            {
-                include: [
-                    {
-                        model: User,
-                        as: "user"
-                    },
-                    {
-                        model: Shift,
-                        as: "shift",
-                        include: [{
-                            model: ShiftCategory,
-                            as: "shift_category"
-                        }]
-                    }
-                ],
-                where: { user_id: user_id }
-            })
-        res.status(200).send(activities);
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -110,7 +75,7 @@ const getActivitiesByUser = async (req, res, next) => {
 const getActivitiesByShiftCategory = async (req, res, next) => {
     let shift_category_id = req.params.shift_category_id;
     try {
-        await baseController.getShiftCategoryById(shift_category_id);
+        await validationService.isShiftCategoryIDValid(shift_category_id);
         let activities = await Activity.findAll({
             include: [
                 {
@@ -141,6 +106,5 @@ module.exports = {
     addActivity: addActivity,
     addUserToActivity: addUserToActivity,
     removeUserFromActivity: removeUserFromActivity,
-    getActivitiesByUser: getActivitiesByUser,
     getActivitiesByShiftCategory: getActivitiesByShiftCategory
 }

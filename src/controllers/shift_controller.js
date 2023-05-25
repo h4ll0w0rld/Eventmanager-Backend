@@ -1,15 +1,23 @@
 const db = require("../models");
-const baseController = require("./base_controller");
+const validationService = require("../services/validation_service");
 
 // create main Model
 const Shift = db.shift;
+const Activity = db.activity;
+const User = db.user;
+const Event = db.event;
+const ShiftCategory = db.shift_category;
 
 // GET ALL Shifts from Event
 const getAllShifts = async (req, res, next) => {
     let shift_category_id = req.params.shift_category_id;
     try {
-        await baseController.getShiftCategoryById(shift_category_id);
-        let shifts = await Shift.findAll({ where: { shift_category_id: shift_category_id } })
+        await validationService.isShiftCategoryIDValid(shift_category_id);
+        let shifts = await Shift.findAll(
+            {
+                order: [['date', 'ASC'], ['startTime', 'ASC']],
+                where: { shift_category_id: shift_category_id }
+            })
         res.status(200).send(shifts)
     } catch (error) {
         if (!error.statusCode) {
@@ -20,17 +28,43 @@ const getAllShifts = async (req, res, next) => {
 }
 
 
-// ADD NEW Shift
-const addShift = async (req, res, next) => {
-    let info = {
-        startTime: req.body.startTime,
-        endTime: req.body.endTime,
-        shift_category_id: req.body.shift_category_id
-    }
+// GET all Shifts by User
+
+const getShiftsByUserAndEvent = async (req, res, next) => {
+    let user_id = req.params.user_id;
+    let event_id = req.params.event_id;
     try {
-        await baseController.getShiftCategoryById(info.shift_category_id);
-        const shift = await Shift.create(info)
-        res.status(200).send({ message: "successful created new Shift", data: shift })
+        await validationService.isUserIDValid(user_id);
+        await validationService.isEventIDValid(event_id);
+        let shifts = await Shift.findAll(
+            {
+                include: [
+                    {
+                        model: Activity,
+                        as: "activities",
+                        include: [
+                            {
+                                model: User,
+                                as: "user"
+                            }
+                        ]
+                    },
+
+                    {
+                        model: ShiftCategory,
+                        as: "shift_category"
+                    }
+                ],
+                where: {
+                    '$shift_category.event_id$': event_id,
+                    '$activities.user_id$': user_id
+                },
+                order: [
+                    ['date', 'ASC'],
+                    ['startTime', 'ASC']
+                ]
+            });
+        res.status(200).send(shifts);
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -42,5 +76,5 @@ const addShift = async (req, res, next) => {
 
 module.exports = {
     getAllShifts: getAllShifts,
-    addShift: addShift
+    getShiftsByUserAndEvent: getShiftsByUserAndEvent
 }

@@ -6,12 +6,16 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
+        date: {
+            type: DataTypes.DATEONLY,
+            allowNull: false
+        },
         startTime: {
-            type: DataTypes.DATE,
+            type: DataTypes.TIME,
             allowNull: false
         },
         endTime: {
-            type: DataTypes.DATE,
+            type: DataTypes.TIME,
             allowNull: false
         }
     })
