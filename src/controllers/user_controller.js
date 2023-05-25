@@ -37,6 +37,40 @@ const getUserByEvent = async (req, res, next) => {
     }
 }
 
+//GET all Users
+
+const getAllUsers = async (req, res, next) => {
+    try {
+        let users = await User.findAll(
+            {
+                order: [['lastName', 'ASC'], ['firstName', 'ASC']]
+            })
+        res.status(200).send(users)
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+// DELETE User by ID
+
+const deleteUserById = async (req, res, next) => {
+    let user_id = req.params.user_id;
+    try {
+        await validationService.isUserIDValid(user_id);
+        let user = await User.destroy({ where: { id: user_id } })
+        res.status(200).send({ message: "successful deleted User" })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+
 
 
 // TODO Add user to event
@@ -62,5 +96,7 @@ const addUser = async (req, res, next) => {
 module.exports = {
     getUserById: getUserById,
     getUserByEvent: getUserByEvent,
+    getAllUsers: getAllUsers,
+    deleteUserById: deleteUserById,
     addUser: addUser
 }
