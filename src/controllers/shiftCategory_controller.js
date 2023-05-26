@@ -45,7 +45,7 @@ const addShiftCategory = async (req, res, next) => {
             }
 
         );
-        res.status(200).send({ message: "successful created new Category", data: shiftCategory })
+        res.status(201).send({ message: "successful created new Category", data: shiftCategory })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -62,7 +62,7 @@ const deleteShiftCategory = async (req, res, next) => {
     try {
         await validationService.isShiftCategoryIDValid(id);
         await ShiftCategory.destroy({ where: { id: id } });
-        res.status(200).send({ message: "successful deleted Shift_Category" })
+        res.status(204).send({ message: "successful deleted Shift_Category" })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;

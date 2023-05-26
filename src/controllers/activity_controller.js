@@ -16,7 +16,7 @@ const addActivity = async (req, res, next) => {
     try {
         await validationService.isShiftIDValid(info.shift_id);
         const activity = await Activity.create(info)
-        res.status(200).send({ message: "successful created new Activity", data: activity })
+        res.status(201).send({ message: "successful created new Activity", data: activity })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -40,7 +40,7 @@ const addUserToActivity = async (req, res, next) => {
             // if user doesn't exist
             await validationService.isUserIDValid(user_id);
             await activity.update({ user_id: user_id });
-            res.status(200).send({ message: "successful added User to Activity" })
+            res.status(204).send({ message: "successful added User to Activity" })
         }
     } catch (error) {
         if (!error.statusCode) {
@@ -58,7 +58,7 @@ const removeUserFromActivity = async (req, res, next) => {
     try {
         await validationService.isActivityIDValid(activity_id);
         await Activity.update({ user_id: null }, { where: { id: activity_id } })
-        res.status(200).send({ message: "successful deleted User from Activity" })
+        res.status(204).send({ message: "successful deleted User from Activity" })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;

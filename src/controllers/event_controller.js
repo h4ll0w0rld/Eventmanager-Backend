@@ -38,7 +38,7 @@ const addEvent = async (req, res, next) => {
     try {
         await validationService.isAddEventValid(info);
         const event = await Event.create(info)
-        res.status(200).send({ message: "successful created new Event", data: event })
+        res.status(201).send({ message: "successful created new Event", data: event })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;

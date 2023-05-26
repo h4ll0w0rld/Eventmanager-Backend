@@ -61,7 +61,7 @@ const deleteUserById = async (req, res, next) => {
     try {
         await validationService.isUserIDValid(user_id);
         let user = await User.destroy({ where: { id: user_id } })
-        res.status(200).send({ message: "successful deleted User" })
+        res.status(204).send({ message: "successful deleted User" })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -83,10 +83,14 @@ const addUser = async (req, res, next) => {
     }
     try {
         const user = await User.create(info)
-        res.status(200).send({ message: "successful created new User", data: user })
+        res.status(201).send({ message: "successful created new User", data: user })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
+        }
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            error.message = "Email address already exists";
+            error.statusCode = 400;
         }
         next(error);
     }
