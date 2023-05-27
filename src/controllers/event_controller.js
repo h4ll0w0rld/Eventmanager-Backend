@@ -47,8 +47,29 @@ const addEvent = async (req, res, next) => {
     }
 }
 
+//Delete Event by ID
+const deleteEventById = async (req, res, next) => {
+    let eventId = req.params.event_id;
+
+    try {
+        await validationService.isEventIDValid(eventId);
+        const event = await Event.destroy({
+            where: {
+                id: eventId
+            }
+        })
+        res.status(204).send({ message: "successful deleted Event" })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
 
 module.exports = {
     getAllEvents: getAllEvents,
-    addEvent: addEvent
+    addEvent: addEvent,
+    deleteEventById: deleteEventById
 }
