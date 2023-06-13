@@ -27,6 +27,42 @@ const getAllShifts = async (req, res, next) => {
     }
 }
 
+// Get Shift by ID
+
+const getShiftById = async (req, res, next) => {
+    let shift_id = req.params.shift_id;
+    try {
+        await validationService.isShiftIDValid(shift_id);
+        let shift = await Shift.findOne(
+            {
+                include: [
+                    {
+                        model: Activity,
+                        as: "activities",
+                        include: [
+                            {
+                                model: User,
+                                as: "user"
+                            }
+                        ]
+                    },
+                ],
+                where: { id: shift_id },
+                order: [
+                    [{ model: Activity, as: "activities" }, "user_id", "DESC"]
+                ]
+            });
+        res.status(200).send(shift);
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+
+
 
 // GET all Shifts by User
 
@@ -76,5 +112,6 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
 
 module.exports = {
     getAllShifts: getAllShifts,
+    getShiftById: getShiftById,
     getShiftsByUserAndEvent: getShiftsByUserAndEvent
 }

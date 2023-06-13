@@ -27,7 +27,7 @@ const addActivity = async (req, res, next) => {
 
 
 // Add User to Activity
-
+//TODO Validate if User is available
 const addUserToActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     let user_id = req.params.user_id;

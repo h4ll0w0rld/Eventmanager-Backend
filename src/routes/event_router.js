@@ -10,3 +10,5 @@ router.delete('/delete/event_id/:event_id', eventController.deleteEventById);
 
 
 module.exports = router;
+
+
