@@ -58,8 +58,8 @@ const getAvailableUsers = async (req, res, next) => {
                                 as: "shift",
                                 where: {
                                     date: activity.shift.date,
-                                    startTime: { [sequelize.Op.lte]: activity.shift.endTime },
-                                    endTime: { [sequelize.Op.gte]: activity.shift.startTime }
+                                    startTime: { [sequelize.Op.lt]: activity.shift.endTime },
+                                    endTime: { [sequelize.Op.gt]: activity.shift.startTime }
                                 }
                             }
                         ],
