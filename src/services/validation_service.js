@@ -34,18 +34,18 @@ const isUserAvailable = async (user_id, activity_id) => {
                     as: "shift",
                     where: {
                         date: activity.shift.date,
-                        startTime: { [sequelize.Op.lte]: activity.shift.endTime },
-                        endTime: { [sequelize.Op.gte]: activity.shift.startTime }
-                    }
+                        startTime: { [sequelize.Op.lt]: activity.shift.endTime },
+                        endTime: { [sequelize.Op.gt]: activity.shift.startTime }
+                    },
                 },
                 {
                     model: User,
                     as: "user",
                     where: {
                         id: user_id
-                    }
+                    },
                 }
-            ]
+            ],
         })
         if (conflictingActivities.length > 0) {
             throw Object.assign(new Error("User is not available! (validationService)"), { statusCode: 400 });
