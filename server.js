@@ -4,8 +4,7 @@ const db = require("./src/models");
 const cors = require('cors');
 
 
-// import error controller
-const errorController = require('./src/controllers/error_controller');
+
 
 
 
@@ -30,6 +29,24 @@ app.use(cors(corsOptions))
 app.options('*', cors());
 
 
+/*
+*******
+*******
+Middleware
+*******
+*******
+*/
+
+const baseAuth = require('./src/middleware/basic_auth_middleware');
+app.use(baseAuth.basicAuth);
+/*
+*******
+*******
+Routes
+*******
+*******
+*/
+
 // define route files
 const shiftCategoryRoute = require('./src/routes/shiftCategory_router');
 app.use('/shiftCategory', shiftCategoryRoute);
@@ -47,6 +64,24 @@ app.use('/shift', shiftRoute);
 const activityRoute = require('./src/routes/activity_router');
 app.use('/activity', activityRoute);
 
+
+
+
+
+
+
+
+/*
+*******
+*******
+Error Handling
+*******
+*******
+*/
+
+
+// import error controller
+const errorController = require('./src/controllers/error_controller');
 // error handling
 app.use(errorController.get400);
 app.use(errorController.get404);

@@ -32,7 +32,9 @@ const addActivity = async (req, res, next) => {
 const getAvailableUsers = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     try {
+        // check if activity exists
         await validationService.isActivityIDValid(activity_id);
+        // get activity with shift
         const activity = await Activity.findOne({
             include: [
                 {
@@ -42,11 +44,11 @@ const getAvailableUsers = async (req, res, next) => {
             ],
             where: { id: activity_id }
         })
+        //check if activity already has an user
         if (activity.user_id) {
-            // if activity already has an user
             throw Object.assign(new Error('Activity already has an user!'), { statusCode: 400 });
         } else {
-
+            // find all unavailable users
             const unavailableUsers = await User.findAll({
                 include: [
                     {
@@ -67,11 +69,13 @@ const getAvailableUsers = async (req, res, next) => {
                     }
                 ]
             })
+            // find all users
             const allUsers = await User.findAll(
                 {
                     order: [['lastName', 'ASC'], ['firstName', 'ASC']]
                 }
             );
+            // filter all users by unavailable users
             const availableUsers = allUsers.filter(user => !unavailableUsers.some(unavailableUser => unavailableUser.id === user.id));
             res.status(200).send(availableUsers);
         }
