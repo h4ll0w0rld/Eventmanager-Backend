@@ -1,12 +1,66 @@
 const moment = require('moment');
 
 const db = require("../models");
+const sequelize = db.Sequelize;
 
 const Event = db.event;
 const ShiftCategory = db.shift_category;
 const Shift = db.shift;
 const User = db.user;
 const Activity = db.activity;
+
+
+
+
+
+// checks if the user is available for the activity
+const isUserAvailable = async (user_id, activity_id) => {
+    try {
+        const activity = await Activity.findOne({
+            where: {
+                id: activity_id
+            },
+            include: [
+                {
+                    model: Shift,
+                    as: "shift"
+                }
+            ]
+        })
+        const conflictingActivities = await Activity.findAll({
+            include: [
+                {
+                    model: Shift,
+                    as: "shift",
+                    where: {
+                        date: activity.shift.date,
+                        startTime: { [sequelize.Op.lte]: activity.shift.endTime },
+                        endTime: { [sequelize.Op.gte]: activity.shift.startTime }
+                    }
+                },
+                {
+                    model: User,
+                    as: "user",
+                    where: {
+                        id: user_id
+                    }
+                }
+            ]
+        })
+        if (conflictingActivities.length > 0) {
+            throw Object.assign(new Error("User is not available! (validationService)"), { statusCode: 400 });
+        } else {
+            return true;
+        }
+    } catch (err) {
+        throw err;
+    }
+}
+
+
+
+
+
 
 
 /******
@@ -42,11 +96,6 @@ const isAddEventValid = async (event) => {
         throw err;
     }
 }
-
-
-
-
-
 
 
 
@@ -256,6 +305,7 @@ const isDateRangeValid = (startDate, endDate) => {
 
 
 module.exports = {
+    isUserAvailable,
     isAddShiftCategoryValid,
     isAddEventValid,
     isEventIDValid,

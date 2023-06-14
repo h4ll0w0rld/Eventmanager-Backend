@@ -7,6 +7,8 @@ const User = db.user;
 const Shift = db.shift;
 const ShiftCategory = db.shift_category;
 
+const sequelize = db.Sequelize;
+
 
 // Add new Activity
 const addActivity = async (req, res, next) => {
@@ -26,6 +28,63 @@ const addActivity = async (req, res, next) => {
 }
 
 
+// GET Available Users
+const getAvailableUsers = async (req, res, next) => {
+    let activity_id = req.params.activity_id;
+    try {
+        await validationService.isActivityIDValid(activity_id);
+        const activity = await Activity.findOne({
+            include: [
+                {
+                    model: Shift,
+                    as: "shift"
+                }
+            ],
+            where: { id: activity_id }
+        })
+        if (activity.user_id) {
+            // if activity already has an user
+            throw Object.assign(new Error('Activity already has an user!'), { statusCode: 400 });
+        } else {
+
+            const unavailableUsers = await User.findAll({
+                include: [
+                    {
+                        model: Activity,
+                        as: "activities",
+                        include: [
+                            {
+                                model: Shift,
+                                as: "shift",
+                                where: {
+                                    date: activity.shift.date,
+                                    startTime: { [sequelize.Op.lte]: activity.shift.endTime },
+                                    endTime: { [sequelize.Op.gte]: activity.shift.startTime }
+                                }
+                            }
+                        ],
+                        required: true
+                    }
+                ]
+            })
+            const allUsers = await User.findAll(
+                {
+                    order: [['lastName', 'ASC'], ['firstName', 'ASC']]
+                }
+            );
+            const availableUsers = allUsers.filter(user => !unavailableUsers.some(unavailableUser => unavailableUser.id === user.id));
+            res.status(200).send(availableUsers);
+        }
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+
+
 // Add User to Activity
 //TODO Validate if User is available
 const addUserToActivity = async (req, res, next) => {
@@ -39,6 +98,7 @@ const addUserToActivity = async (req, res, next) => {
         } else {
             // if user doesn't exist
             await validationService.isUserIDValid(user_id);
+            await validationService.isUserAvailable(user_id, activity_id);
             await activity.update({ user_id: user_id });
             res.status(204).send({ message: "successful added User to Activity" })
         }
@@ -49,7 +109,6 @@ const addUserToActivity = async (req, res, next) => {
         next(error);
     }
 }
-
 
 // Delete User from Activity
 
@@ -104,6 +163,7 @@ const getActivitiesByShiftCategory = async (req, res, next) => {
 
 module.exports = {
     addActivity: addActivity,
+    getAvailableUsers: getAvailableUsers,
     addUserToActivity: addUserToActivity,
     removeUserFromActivity: removeUserFromActivity,
     getActivitiesByShiftCategory: getActivitiesByShiftCategory
