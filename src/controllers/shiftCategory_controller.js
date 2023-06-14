@@ -32,7 +32,8 @@ const addShiftCategory = async (req, res, next) => {
         await validationService.isAddShiftCategoryValid(info);
         const shiftCategoryObject = new Shift_Category_class(info);
         shiftCategoryObject.createShifts(info);
-        const shiftCategory = await ShiftCategory.create(shiftCategoryObject,
+        const shiftCategoryArray = [shiftCategoryObject];
+        const shiftCategory = await ShiftCategory.bulkCreate(shiftCategoryArray,
             {
                 include: [{
                     model: Shift,
