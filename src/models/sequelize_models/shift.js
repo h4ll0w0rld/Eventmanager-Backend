@@ -17,6 +17,11 @@ module.exports = (sequelize, DataTypes) => {
         endTime: {
             type: DataTypes.TIME,
             allowNull: false
+        },
+        isActive: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
         }
     })
 

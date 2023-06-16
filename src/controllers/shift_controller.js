@@ -62,6 +62,30 @@ const getShiftById = async (req, res, next) => {
 }
 
 
+//PUT set Shift to active
+const setisActive = async (req, res, next) => {
+    let shift_id = req.params.shift_id;
+    let isActive = req.params.isActive;
+    try {
+        await validationService.isShiftIDValid(shift_id);
+        if (typeof isActive === "boolean") {
+            throw Object.assign(new Error('isActive must be a boolean!'), { statusCode: 400 });
+        }
+        await Shift.update(
+            { isActive: isActive },
+            { where: { id: shift_id } }
+        )
+        res.status(204).send({ message: "Shift set to active" });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+
+
 
 
 // GET all Shifts by User
@@ -113,5 +137,6 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
 module.exports = {
     getAllShifts: getAllShifts,
     getShiftById: getShiftById,
+    setisActive: setisActive,
     getShiftsByUserAndEvent: getShiftsByUserAndEvent
 }
