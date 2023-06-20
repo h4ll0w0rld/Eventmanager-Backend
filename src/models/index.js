@@ -107,7 +107,7 @@ db.activity.belongsTo(db.shift, {
 });
 
 db.user.hasMany(db.activity, {
-    onDelete: 'restrict',
+    onDelete: 'set null',
     foreignKey: {
         name: 'user_id',
         allowNull: true
