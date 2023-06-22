@@ -122,7 +122,7 @@ const getShiftCategoryObjectById = async (req, res, next) => {
                 order: [
                     [{ model: Shift, as: 'shifts' }, 'date', 'ASC'],
                     [{ model: Shift, as: 'shifts' }, 'startTime', 'ASC'],
-                    [{ model: Shift, as: "shifts" }, { model: Activity, as: "activities" }, "user_id", "DESC"],
+                    [{ model: Shift, as: "shifts" }, { model: Activity, as: "activities" }, "id", "DESC"],
                 ]
             });
         res.status(200).send(shiftCategoryObject);
@@ -167,7 +167,7 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
                     [{ model: ShiftCategory, as: 'shift_categories' }, 'name', 'ASC'],
                     [{ model: ShiftCategory, as: 'shift_categories' }, { model: Shift, as: 'shifts' }, 'date', 'ASC'],
                     [{ model: ShiftCategory, as: 'shift_categories' }, { model: Shift, as: 'shifts' }, 'startTime', 'ASC'],
-                    [{ model: ShiftCategory, as: 'shift_categories' }, { model: Shift, as: "shifts" }, { model: Activity, as: "activities" }, "user_id", "DESC"]
+                    [{ model: ShiftCategory, as: 'shift_categories' }, { model: Shift, as: "shifts" }, { model: Activity, as: "activities" }, "id", "DESC"]
                 ]
             });
         res.status(200).send(eventObject);

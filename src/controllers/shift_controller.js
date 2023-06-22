@@ -49,7 +49,7 @@ const getShiftById = async (req, res, next) => {
                 ],
                 where: { id: shift_id },
                 order: [
-                    [{ model: Activity, as: "activities" }, "user_id", "DESC"]
+                    [{ model: Activity, as: "activities" }, "id", "DESC"]
                 ]
             });
         res.status(200).send(shift);
