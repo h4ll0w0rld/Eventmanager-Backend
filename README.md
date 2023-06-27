@@ -35,3 +35,9 @@ all Routes are configured in `./routes/routes.js`
 
 ## controller
 every interaction with the requests are handled in the controllers `./controller/*`
+
+
+# Dokumentation
+ 
+The full API-Dokumentation could be fould here: 
+https://documenter.getpostman.com/view/26686947/2s93z894E6

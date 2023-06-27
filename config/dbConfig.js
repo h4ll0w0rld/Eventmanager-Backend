@@ -3,6 +3,7 @@ module.exports = {
     USER: 'nils1',
     PASSWORD: 'Projektle2023!',
     DB: 'testDB',
+    // DB: 'eventappdb',
     PORT: 3306,
     DIALECT: 'mysql',
     TIMEZONE: '-02:00'
