@@ -1,6 +1,9 @@
 const db = require("../models");
 const validationService = require("../services/validation_service");
 
+const moment = require('moment');
+
+
 // create main Model
 const Shift = db.shift;
 const Activity = db.activity;
@@ -134,9 +137,49 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
 }
 
 
+
+
+
+
+
+//TODO Validate
+
+const getShiftArray = (shiftBlocks) => {
+    let shiftArray = [];
+    try {
+        shiftBlocks.forEach(shiftBlock => {
+            const intervall = shiftBlock.intervall;
+            const activitiesPerShift = shiftBlock.activitiesPerShift;
+            const numberOfShifts = shiftBlock.numberOfShifts;
+            const startTime = shiftBlock.startTime;
+            const endTime = shiftBlock.endTime;
+            const day = shiftBlock.day;
+            for (let i = 0; i < numberOfShifts; i++) {
+                const shiftStartTime = moment(startTime, 'HH:mm', true).add(intervall * i, 'minutes').format('HH:mm');
+                const shiftEndTime = moment(shiftStartTime, 'HH:mm', true).add(intervall, 'minutes').format('HH:mm');
+                let shift = {
+                    date: day,
+                    startTime: shiftStartTime,
+                    endTime: shiftEndTime,
+                    activities: []
+                }
+                for (let i = 0; i < activitiesPerShift; i++) {
+                    shift.activities.push({})
+                }
+                shiftArray.push(shift);
+            }
+        })
+        return shiftArray;
+    } catch (error) {
+        throw Object.assign(new Error("There was an Error creating the array of Shifts out of the ShiftBlocks (shift_controller)"), { statusCode: 500 });
+    }
+}
+
+
 module.exports = {
     getAllShifts: getAllShifts,
     getShiftById: getShiftById,
     setisActive: setisActive,
-    getShiftsByUserAndEvent: getShiftsByUserAndEvent
+    getShiftsByUserAndEvent: getShiftsByUserAndEvent,
+    getShiftArray: getShiftArray
 }

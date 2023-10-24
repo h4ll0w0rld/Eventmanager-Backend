@@ -1,5 +1,6 @@
 const db = require("../models");
 const validationService = require("../services/validation_service");
+const shiftController = require("../controllers/shift_controller");
 
 import Shift_Category_class from "../models/classes/Shift_category";
 
@@ -19,19 +20,13 @@ const addShiftCategory = async (req, res, next) => {
     let info = {
         name: req.body.name,
         description: req.body.description,
-        intervall: req.body.intervall,
-        activitiesPerShift: req.body.activitiesPerShift,
-        startTime: req.body.startTime,
-        endTime: req.body.endTime,
-        days: req.body.days,
         event_id: req.body.event_id,
-
+        shiftBlocks: req.body.shiftBlocks
     }
-
     try {
-        await validationService.isAddShiftCategoryValid(info);
-        const shiftCategoryObject = new Shift_Category_class(info);
-        shiftCategoryObject.createShifts(info);
+        // await validationService.isAddShiftCategoryValid(info);
+        const shifts = shiftController.getShiftArray(info.shiftBlocks);
+        const shiftCategoryObject = new Shift_Category_class(info, shifts);
         const shiftCategoryArray = [shiftCategoryObject];
         const shiftCategory = await ShiftCategory.bulkCreate(shiftCategoryArray,
             {
@@ -54,6 +49,8 @@ const addShiftCategory = async (req, res, next) => {
         next(error);
     }
 }
+
+
 
 
 // DELETE Shift_Category by ID
@@ -178,7 +175,6 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
         next(error);
     }
 }
-
 
 
 

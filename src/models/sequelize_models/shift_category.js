@@ -13,14 +13,6 @@ module.exports = (sequelize, DataTypes) => {
         description: {
             type: DataTypes.STRING,
             allowNull: true
-        },
-        intervall: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        activitiesPerShift: {
-            type: DataTypes.INTEGER,
-            allowNull: false
         }
     })
 
