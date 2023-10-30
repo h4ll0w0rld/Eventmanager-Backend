@@ -19,4 +19,3 @@ module.exports = (sequelize, DataTypes) => {
     return Shift_Category
 }
 
-//TODO StartTime, EndTime, Interval, Array of Days

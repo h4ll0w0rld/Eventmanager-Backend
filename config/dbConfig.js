@@ -5,5 +5,8 @@ module.exports = {
     DB: 'ventIT',
     PORT: 3306,
     DIALECT: 'mysql',
-    TIMEZONE: '-02:00'
+    DIALECT_OPTIONS: {
+        useUTC: false, //for reading from database
+    },
+    TIMEZONE: '+00:00'
 };

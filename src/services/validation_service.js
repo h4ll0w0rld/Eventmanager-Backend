@@ -33,7 +33,6 @@ const isUserAvailable = async (user_id, activity_id) => {
                     model: Shift,
                     as: "shift",
                     where: {
-                        date: activity.shift.date,
                         startTime: { [sequelize.Op.lt]: activity.shift.endTime },
                         endTime: { [sequelize.Op.gt]: activity.shift.startTime }
                     },
@@ -69,28 +68,46 @@ const isUserAvailable = async (user_id, activity_id) => {
  * 
  *  ******/
 
-const isAddShiftCategoryValid = async (shiftCategory) => {
-    try {
-        isTimeValid(shiftCategory.startTime);
-        isTimeValid(shiftCategory.endTime);
-        isTimeRangeValid(shiftCategory.startTime, shiftCategory.endTime);
-        isArrayofDatesValid(shiftCategory.days);
-        const event = await isEventIDValid(shiftCategory.event_id);
-        shiftCategory.days.forEach(day => {
-            isDayinEvent(day, event);
-        });
-        isTimeRangeDivisibleByIntervall(shiftCategory.startTime, shiftCategory.endTime, shiftCategory.intervall);
-        return true;
-    } catch (err) {
-        throw err;
-    }
-}
-
 const isAddEventValid = async (event) => {
     try {
-        isDateValid(event.startDate);
-        isDateValid(event.endDate);
-        isDateRangeValid(event.startDate, event.endDate);
+        isTimeValid(event.startDate);
+        isTimeValid(event.endDate);
+        isTimeRangeValid(event.startDate, event.endDate);
+        return true;
+    } catch (err) {
+        throw err;
+    }
+}
+
+const isAddShiftCategoryValid = async (shiftCategory) => {
+    try {
+        const event = await isEventIDValid(shiftCategory.event_id);
+        const shiftBlocks = shiftCategory.shiftBlocks;
+        areShiftBlocksValid(shiftBlocks, event);
+        return true;
+    } catch (err) {
+        throw err;
+    }
+}
+
+//TODO is addShiftBlockValid
+const isAddShiftBlockToCategoryValid = async (shift_category_id, shiftBlocks) => {
+    try {
+        await isShiftCategoryIDValid(shift_category_id);
+        const event = await Event.findOne({ where: { id: shift_category_id } });
+        areShiftBlocksValid(shiftBlocks, event);
+        for (const shiftBlock of shiftBlocks) {
+            const conflictingShifts = await Shift.findAll({
+                where: {
+                    shift_category_id: shift_category_id,
+                    startTime: { [sequelize.Op.lt]: shiftBlock.endTime },
+                    endTime: { [sequelize.Op.gt]: shiftBlock.startTime }
+                }
+            })
+            if (conflictingShifts.length > 0) {
+                throw Object.assign(new Error("ShiftBlocks overlap with excisting Shifts in this category! (validationService)"), { statusCode: 400 });
+            }
+        };
         return true;
     } catch (err) {
         throw err;
@@ -98,6 +115,33 @@ const isAddEventValid = async (event) => {
 }
 
 
+
+//Tests if the given Blocks with a shiftcategory are valid
+const areShiftBlocksValid = (shiftBlocks, event) => {
+    try {
+        shiftBlocks.forEach(shiftBlock => {
+            isTimeValid(shiftBlock.startTime);
+            isTimeValid(shiftBlock.endTime);
+            isTimeRangeValid(shiftBlock.startTime, shiftBlock.endTime);
+            isTimeRangeDivisibleByIntervall(shiftBlock.startTime, shiftBlock.endTime, shiftBlock.intervall);
+            isDayinEvent(shiftBlock.startTime, event);
+            isDayinEvent(shiftBlock.endTime, event);
+
+            //Test if ShiftBlocks are overlapping
+            shiftBlocks.forEach(shiftBlock2 => {
+                if (shiftBlock !== shiftBlock2) {
+                    if (moment(shiftBlock.startTime, 'YYYY-MM-DD HH:mm', true).isBefore(moment(shiftBlock2.endTime, 'YYYY-MM-DD HH:mm', true)) &&
+                        moment(shiftBlock.endTime, 'YYYY-MM-DD HH:mm', true).isAfter(moment(shiftBlock2.startTime, 'YYYY-MM-DD HH:mm', true))) {
+                        throw Object.assign(new Error("Shiftblocks overlap! (validationService)"), { statusCode: 400 });
+                    }
+                }
+            });
+        });
+        return true;
+    } catch (err) {
+        throw err;
+    }
+}
 
 
 
@@ -221,9 +265,10 @@ const isDayinEvent = (day, event) => {
 // checks if time range is divisible by intervall
 const isTimeRangeDivisibleByIntervall = (startTime, endTime, intervall) => {
     try {
-        const duration = moment.duration(moment(endTime, 'HH:mm').diff(moment(startTime, 'HH:mm')));
-        const durationInMinutes = duration.asMinutes();
-        if (durationInMinutes % intervall === 0) {
+        const startMoment = moment(startTime, 'YYYY-MM-DD HH:mm', true);
+        const endMoment = moment(endTime, 'YYYY-MM-DD HH:mm', true);
+        const duration = endMoment.diff(startMoment, 'minutes');
+        if (duration % intervall === 0) {
             return true;
         } else {
             throw Object.assign(new Error("Time range is not divisible by intervall (validationService)"), { statusCode: 400 });
@@ -236,7 +281,7 @@ const isTimeRangeDivisibleByIntervall = (startTime, endTime, intervall) => {
 // checks if startTime is before endTime
 const isTimeRangeValid = (startTime, endTime) => {
     try {
-        if (moment(startTime, 'HH:mm', true).isBefore(moment(endTime, 'HH:mm', true))) {
+        if (moment(startTime, 'YYYY-MM-DD HH:mm', true).isBefore(moment(endTime, 'YYYY-MM-DD HH:mm', true))) {
             return true;
         } else {
             throw Object.assign(new Error("startTime must be before endTime (validationService)"), { statusCode: 400 });
@@ -249,59 +294,59 @@ const isTimeRangeValid = (startTime, endTime) => {
 // checks if time is valid format (HH:mm)
 const isTimeValid = (time) => {
     try {
-        if (moment(time, 'HH:mm', true).isValid()) {
+        if (moment(time, 'YYYY-MM-DD HH:mm', true).isValid()) {
             return true;
         } else {
-            throw Object.assign(new Error("Time is not a valid format (HH:mm) (validationService)"), { statusCode: 400 });
+            throw Object.assign(new Error("Time is not a valid format (YYYY-MM-DD HH:mm) (validationService)"), { statusCode: 400 });
         }
     } catch (err) {
         throw err;
     }
 }
 // checks if date is valid format (YYYY-MM-DD)
-const isDateValid = (date) => {
-    try {
-        if (moment(date, 'YYYY-MM-DD', true).isValid()) {
-            return true;
-        } else {
-            throw Object.assign(new Error("Date is not a valid format (YYYY-MM-DD) (validationService)"), { statusCode: 400 });
-        }
-    } catch (err) {
-        throw err;
-    }
-}
+// const isDateValid = (date) => {
+//     try {
+//         if (moment(date, 'YYYY-MM-DD', true).isValid()) {
+//             return true;
+//         } else {
+//             throw Object.assign(new Error("Date is not a valid format (YYYY-MM-DD) (validationService)"), { statusCode: 400 });
+//         }
+//     } catch (err) {
+//         throw err;
+//     }
+// }
 
 //checks if array of dates is valid format and if dates are unique
-const isArrayofDatesValid = (dates) => {
-    try {
-        dates.forEach(date => {
-            isDateValid(date);
-        });
-        if (dates.length === new Set(dates).size) {
-            return true;
-        } else {
-            throw Object.assign(new Error("Dates are not unique (validationService)"), { statusCode: 400 });
-        }
-    } catch (err) {
-        throw err;
-    }
-}
+// const isArrayofDatesValid = (dates) => {
+//     try {
+//         dates.forEach(date => {
+//             isDateValid(date);
+//         });
+//         if (dates.length === new Set(dates).size) {
+//             return true;
+//         } else {
+//             throw Object.assign(new Error("Dates are not unique (validationService)"), { statusCode: 400 });
+//         }
+//     } catch (err) {
+//         throw err;
+//     }
+// }
 
 
 
 
 // checks if startDate is before endDate
-const isDateRangeValid = (startDate, endDate) => {
-    try {
-        if (moment(startDate, 'YYYY-MM-DD', true).isBefore(moment(endDate, 'YYYY-MM-DD', true))) {
-            return true;
-        } else {
-            throw Object.assign(new Error("startDate must be before endDate (validationService)"), { statusCode: 400 });
-        }
-    } catch (err) {
-        throw err;
-    }
-}
+// const isDateRangeValid = (startDate, endDate) => {
+//     try {
+//         if (moment(startDate, 'YYYY-MM-DD', true).isBefore(moment(endDate, 'YYYY-MM-DD', true))) {
+//             return true;
+//         } else {
+//             throw Object.assign(new Error("startDate must be before endDate (validationService)"), { statusCode: 400 });
+//         }
+//     } catch (err) {
+//         throw err;
+//     }
+// }
 
 
 module.exports = {
@@ -312,6 +357,6 @@ module.exports = {
     isShiftCategoryIDValid,
     isShiftIDValid,
     isActivityIDValid,
-    isUserIDValid
-
+    isUserIDValid,
+    isAddShiftBlockToCategoryValid
 }

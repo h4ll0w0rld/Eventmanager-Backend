@@ -18,7 +18,7 @@ const getAllShifts = async (req, res, next) => {
         await validationService.isShiftCategoryIDValid(shift_category_id);
         let shifts = await Shift.findAll(
             {
-                order: [['date', 'ASC'], ['startTime', 'ASC']],
+                order: [['startTime', 'ASC']],
                 where: { shift_category_id: shift_category_id }
             })
         res.status(200).send(shifts)
@@ -123,7 +123,6 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
                     '$activities.user_id$': user_id
                 },
                 order: [
-                    ['date', 'ASC'],
                     ['startTime', 'ASC']
                 ]
             });
@@ -153,25 +152,30 @@ const getShiftArray = (shiftBlocks) => {
             const numberOfShifts = shiftBlock.numberOfShifts;
             const startTime = shiftBlock.startTime;
             const endTime = shiftBlock.endTime;
-            const day = shiftBlock.day;
             for (let i = 0; i < numberOfShifts; i++) {
-                const shiftStartTime = moment(startTime, 'HH:mm', true).add(intervall * i, 'minutes').format('HH:mm');
-                const shiftEndTime = moment(shiftStartTime, 'HH:mm', true).add(intervall, 'minutes').format('HH:mm');
+                const shiftStartTime = moment(startTime, 'YYYY-MM-DD HH:mm', true).add(intervall * i, 'minutes').format('YYYY-MM-DD HH:mm');
+                const shiftEndTime = moment(shiftStartTime, 'YYYY-MM-DD HH:mm', true).add(intervall, 'minutes').format('YYYY-MM-DD HH:mm');
                 let shift = {
-                    date: day,
                     startTime: shiftStartTime,
                     endTime: shiftEndTime,
                     activities: []
                 }
-                for (let i = 0; i < activitiesPerShift; i++) {
+                // check if the given endTime matches the numberofShifts
+                if (i === (numberOfShifts - 1) && shift.endTime !== endTime) {
+                    console.log(shift);
+                    throw Object.assign(new Error('Shifts do not match the given time range!'), { statusCode: 400 });
+                }
+                //adding the activities to the shift
+                for (let j = 0; j < activitiesPerShift; j++) {
                     shift.activities.push({})
                 }
+                //add the shift to the array of shifts
                 shiftArray.push(shift);
             }
         })
         return shiftArray;
     } catch (error) {
-        throw Object.assign(new Error("There was an Error creating the array of Shifts out of the ShiftBlocks (shift_controller)"), { statusCode: 500 });
+        throw error;
     }
 }
 

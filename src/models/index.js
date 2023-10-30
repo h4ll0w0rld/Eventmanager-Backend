@@ -11,6 +11,7 @@ const sequelize = new Sequelize(
         host: dbConfig.HOST,
         port: dbConfig.PORT,
         dialect: dbConfig.DIALECT,
+        dialectOptions: dbConfig.DIALECT_OPTIONS,
         timezone: dbConfig.TIMEZONE,
         define: {
             timestamps: false
@@ -40,7 +41,7 @@ db.userEvent = sequelize.define('user_event', {});
 
 
 
-db.sequelize.sync({ force: false })
+db.sequelize.sync({ force: true })
     .then(() => {
         console.log('Databse synced');
     }).catch((error) => {
@@ -85,7 +86,7 @@ db.shift.belongsTo(db.shift_category, {
     as: 'shift_category'
 });
 
-//TODO: onDelete: 'cascade'
+// test
 db.event.belongsToMany(db.user, { through: db.userEvent });
 db.user.belongsToMany(db.event, { through: db.userEvent });
 

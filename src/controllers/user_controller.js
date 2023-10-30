@@ -73,7 +73,6 @@ const deleteUserById = async (req, res, next) => {
 
 
 
-// TODO Add user to event
 // ADD NEW User
 const addUser = async (req, res, next) => {
     let info = {

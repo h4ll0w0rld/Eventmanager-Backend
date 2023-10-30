@@ -6,6 +6,7 @@ const router = express.Router();
 router.get('/names/event_id/:event_id', shiftCategoryController.getAllShiftCategoryNames);
 router.delete('/delete/id/:id', shiftCategoryController.deleteShiftCategory);
 router.post('/add', shiftCategoryController.addShiftCategory);
+router.post('/addShiftBlockToCategory/shift_category_id/:shift_category_id', shiftCategoryController.addShiftBlock);
 router.get('/id/:id/getShifts', shiftCategoryController.getShiftCategoryById);
 router.get('/all/event_id/:event_id', shiftCategoryController.getAllShiftCategoriesByEvent);
 

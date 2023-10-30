@@ -33,7 +33,6 @@ const addEvent = async (req, res, next) => {
         startDate: req.body.startDate,
         endDate: req.body.endDate,
         location: req.body.location,
-        // user_id: req.body.user_id
     }
     try {
         await validationService.isAddEventValid(info);

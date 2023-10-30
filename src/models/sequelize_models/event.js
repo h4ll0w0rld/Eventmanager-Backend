@@ -1,3 +1,4 @@
+const moment = require('moment-timezone');
 module.exports = (sequelize, DataTypes) => {
     const Event = sequelize.define('Event', {
         id: {
@@ -15,12 +16,18 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         startDate: {
-            type: DataTypes.DATEONLY,
-            allowNull: false
+            type: DataTypes.DATE,
+            allowNull: false,
+            get() {
+                return moment(this.getDataValue('startDate')).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm');
+            }
         },
         endDate: {
-            type: DataTypes.DATEONLY,
-            allowNull: false
+            type: DataTypes.DATE,
+            allowNull: false,
+            get() {
+                return moment(this.getDataValue('endDate')).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm');
+            }
         },
         location: {
             type: DataTypes.STRING,

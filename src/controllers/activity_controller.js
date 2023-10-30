@@ -59,7 +59,6 @@ const getAvailableUsers = async (req, res, next) => {
                                 model: Shift,
                                 as: "shift",
                                 where: {
-                                    date: activity.shift.date,
                                     startTime: { [sequelize.Op.lt]: activity.shift.endTime },
                                     endTime: { [sequelize.Op.gt]: activity.shift.startTime }
                                 }
@@ -90,7 +89,6 @@ const getAvailableUsers = async (req, res, next) => {
 
 
 // Add User to Activity
-//TODO Validate if User is available
 const addUserToActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     let user_id = req.params.user_id;

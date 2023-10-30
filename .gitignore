@@ -1,5 +1,7 @@
 /node_modules
-config.js
+config/dbConfig.js
+TODO.md
+
 
 ######################################
 # macOS

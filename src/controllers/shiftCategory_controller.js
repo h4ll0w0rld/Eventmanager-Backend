@@ -1,3 +1,5 @@
+const moment = require('moment-timezone');
+
 const db = require("../models");
 const validationService = require("../services/validation_service");
 const shiftController = require("../controllers/shift_controller");
@@ -15,7 +17,6 @@ const Event = db.event;
 
 
 // ADD NEW Shift_Category
-//TODO fix
 const addShiftCategory = async (req, res, next) => {
     let info = {
         name: req.body.name,
@@ -24,7 +25,7 @@ const addShiftCategory = async (req, res, next) => {
         shiftBlocks: req.body.shiftBlocks
     }
     try {
-        // await validationService.isAddShiftCategoryValid(info);
+        await validationService.isAddShiftCategoryValid(info);
         const shifts = shiftController.getShiftArray(info.shiftBlocks);
         const shiftCategoryObject = new Shift_Category_class(info, shifts);
         const shiftCategoryArray = [shiftCategoryObject];
@@ -50,7 +51,32 @@ const addShiftCategory = async (req, res, next) => {
     }
 }
 
-
+// ADD a new Shiftblock to excisting Shift_Category
+const addShiftBlock = async (req, res, next) => {
+    const shift_category_id = req.params.shift_category_id;
+    const shiftBlocks = req.body.shiftBlocks;
+    try {
+        await validationService.isAddShiftBlockToCategoryValid(shift_category_id, shiftBlocks);
+        const shifts = shiftController.getShiftArray(shiftBlocks);
+        shifts.forEach(shift => {
+            shift.shift_category_id = shift_category_id;
+        });
+        await Shift.bulkCreate(shifts,
+            {
+                include: [{
+                    model: Activity,
+                    as: "activities"
+                }]
+            }
+        );
+        res.status(201).send({ message: "successful added new Shifts" })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
 
 
 // DELETE Shift_Category by ID
@@ -117,7 +143,6 @@ const getShiftCategoryObjectById = async (req, res, next) => {
                 }],
                 where: { id: id },
                 order: [
-                    [{ model: Shift, as: 'shifts' }, 'date', 'ASC'],
                     [{ model: Shift, as: 'shifts' }, 'startTime', 'ASC'],
                     [{ model: Shift, as: "shifts" }, { model: Activity, as: "activities" }, "id", "DESC"],
                 ]
@@ -162,7 +187,6 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
                 where: { id: event_id },
                 order: [
                     [{ model: ShiftCategory, as: 'shift_categories' }, 'name', 'ASC'],
-                    [{ model: ShiftCategory, as: 'shift_categories' }, { model: Shift, as: 'shifts' }, 'date', 'ASC'],
                     [{ model: ShiftCategory, as: 'shift_categories' }, { model: Shift, as: 'shifts' }, 'startTime', 'ASC'],
                     [{ model: ShiftCategory, as: 'shift_categories' }, { model: Shift, as: "shifts" }, { model: Activity, as: "activities" }, "id", "DESC"]
                 ]
@@ -185,5 +209,6 @@ module.exports = {
     deleteShiftCategory: deleteShiftCategory,
     getAllShiftCategoryNames: getAllShiftCategoryNames,
     getShiftCategoryById: getShiftCategoryObjectById,
-    getAllShiftCategoriesByEvent: getAllShiftCategoriesByEvent
+    getAllShiftCategoriesByEvent: getAllShiftCategoriesByEvent,
+    addShiftBlock: addShiftBlock
 }
