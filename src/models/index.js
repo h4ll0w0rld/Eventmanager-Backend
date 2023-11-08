@@ -11,7 +11,6 @@ const sequelize = new Sequelize(
         host: dbConfig.HOST,
         port: dbConfig.PORT,
         dialect: dbConfig.DIALECT,
-        dialectOptions: dbConfig.DIALECT_OPTIONS,
         timezone: dbConfig.TIMEZONE,
         define: {
             timestamps: false
@@ -41,7 +40,7 @@ db.userEvent = sequelize.define('user_event', {});
 
 
 
-db.sequelize.sync({ force: true })
+db.sequelize.sync({ force: false })
     .then(() => {
         console.log('Databse synced');
     }).catch((error) => {
