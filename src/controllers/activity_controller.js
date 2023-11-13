@@ -6,6 +6,8 @@ const Activity = db.activity;
 const User = db.user;
 const Shift = db.shift;
 const ShiftCategory = db.shift_category;
+const Event = db.event;
+const UserEvent = db.userEvent;
 
 const sequelize = db.Sequelize;
 
@@ -93,7 +95,32 @@ const addUserToActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
     let user_id = req.params.user_id;
     try {
-        let activity = await validationService.isActivityIDValid(activity_id);
+        await validationService.isActivityIDValid(activity_id);
+        let activity = await Activity.findOne({
+            include: [
+                {
+                    model: Shift,
+                    as: "shift",
+                    include: [
+                        {
+                            model: ShiftCategory,
+                            as: "shift_category",
+                        }
+                    ]
+                }
+            ],
+            where: { id: activity_id }
+        });
+        // check if user is in the same event
+        let userEvent = await UserEvent.findOne({
+            where: {
+                UserId: user_id,
+                EventId: activity.shift.shift_category.event_id
+            }
+        });
+        if (!userEvent) {
+            throw Object.assign(new Error('User is not in the same Event!'), { statusCode: 400 });
+        }
         if (activity.user) {
             // if activity already has an user
             throw Object.assign(new Error('Activity already has an user!'), { statusCode: 400 });

@@ -20,15 +20,14 @@ const getUserById = async (req, res, next) => {
 
 // GET all Users from Event
 
-const getUserByEvent = async (req, res, next) => {
-    let event_id = req.params.event_id;
+const getEventsByUser = async (req, res, next) => {
+    let user_id = req.params.user_id;
     try {
-        const event = await validationService.isEventIDValid(event_id);
-        let users = await event.getUsers(
-            {
-                order: [['lastName', 'ASC'], ['firstName', 'ASC']]
-            })
-        res.status(200).send(users)
+        const user = await validationService.isUserIDValid(user_id);
+        let events = await user.getEvents({
+            order: [['name', 'ASC']],
+        });
+        res.status(200).send(events)
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -98,7 +97,7 @@ const addUser = async (req, res, next) => {
 
 module.exports = {
     getUserById: getUserById,
-    getUserByEvent: getUserByEvent,
+    getEventsByUser: getEventsByUser,
     getAllUsers: getAllUsers,
     deleteUserById: deleteUserById,
     addUser: addUser
