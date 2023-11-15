@@ -90,11 +90,20 @@ const isAddShiftCategoryValid = async (shiftCategory) => {
     }
 }
 
-//TODO is addShiftBlockValid
+
 const isAddShiftBlockToCategoryValid = async (shift_category_id, shiftBlocks) => {
     try {
         await isShiftCategoryIDValid(shift_category_id);
-        const event = await Event.findOne({ where: { id: shift_category_id } });
+        const shift_category = await ShiftCategory.findOne(
+            {
+                include: [{
+                    model: Event,
+                    as: "event",
+                }],
+                where: { id: shift_category_id }
+            });
+        const event = shift_category.event;
+        console.log(event);
         areShiftBlocksValid(shiftBlocks, event);
         for (const shiftBlock of shiftBlocks) {
             const conflictingShifts = await Shift.findAll({
@@ -303,50 +312,6 @@ const isTimeValid = (time) => {
         throw err;
     }
 }
-// checks if date is valid format (YYYY-MM-DD)
-// const isDateValid = (date) => {
-//     try {
-//         if (moment(date, 'YYYY-MM-DD', true).isValid()) {
-//             return true;
-//         } else {
-//             throw Object.assign(new Error("Date is not a valid format (YYYY-MM-DD) (validationService)"), { statusCode: 400 });
-//         }
-//     } catch (err) {
-//         throw err;
-//     }
-// }
-
-//checks if array of dates is valid format and if dates are unique
-// const isArrayofDatesValid = (dates) => {
-//     try {
-//         dates.forEach(date => {
-//             isDateValid(date);
-//         });
-//         if (dates.length === new Set(dates).size) {
-//             return true;
-//         } else {
-//             throw Object.assign(new Error("Dates are not unique (validationService)"), { statusCode: 400 });
-//         }
-//     } catch (err) {
-//         throw err;
-//     }
-// }
-
-
-
-
-// checks if startDate is before endDate
-// const isDateRangeValid = (startDate, endDate) => {
-//     try {
-//         if (moment(startDate, 'YYYY-MM-DD', true).isBefore(moment(endDate, 'YYYY-MM-DD', true))) {
-//             return true;
-//         } else {
-//             throw Object.assign(new Error("startDate must be before endDate (validationService)"), { statusCode: 400 });
-//         }
-//     } catch (err) {
-//         throw err;
-//     }
-// }
 
 
 module.exports = {
