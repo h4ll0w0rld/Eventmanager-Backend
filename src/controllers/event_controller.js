@@ -97,13 +97,18 @@ const addUserToEvent = async (req, res, next) => {
         await UserEvent.create({ UserId: user.id, EventId: event.id });
         res.status(204).send({ message: "successful added User to Event" })
     } catch (error) {
-        if (error.errors[0].message == "PRIMARY must be unique") {
-            error.message = "User is already added to Event"
-        };
-        if (!error.statusCode) {
-            error.statusCode = 500;
+        try {
+            if (error.errors[0].message == "PRIMARY must be unique") {
+                error.message = "User is already added to Event"
+                error.statusCode = 400;
+            };
+        } catch (error) {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+        } finally {
+            next(error);
         }
-        next(error);
     }
 }
 
