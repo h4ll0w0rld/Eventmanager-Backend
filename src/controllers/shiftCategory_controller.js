@@ -4,7 +4,7 @@ const db = require("../models");
 const validationService = require("../services/validation_service");
 const shiftController = require("../controllers/shift_controller");
 
-import Shift_Category_class from "../models/classes/Shift_category";
+const Shift_Category_class = require("../models/classes/Shift_category");
 
 
 // create main Model
