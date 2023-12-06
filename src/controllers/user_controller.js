@@ -88,7 +88,7 @@ const addUser = async (req, res, next) => {
         }
         if (error.name === 'SequelizeUniqueConstraintError') {
             error.message = "Email address already exists";
-            error.statusCode = 400;
+            error.statusCode = 409;
         }
         next(error);
     }
