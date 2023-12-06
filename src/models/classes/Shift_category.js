@@ -13,4 +13,4 @@ class Shift_Category_class {
 
 
 
-export default Shift_Category_class;
+module.exports = Shift_Category_class;
