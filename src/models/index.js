@@ -40,7 +40,7 @@ db.userEvent = sequelize.define('user_event', {});
 
 
 
-db.sequelize.sync({ force: false })
+db.sequelize.sync({ force: dbConfig.OverwriteOnSync })
     .then(() => {
         console.log('Databse synced');
     }).catch((error) => {

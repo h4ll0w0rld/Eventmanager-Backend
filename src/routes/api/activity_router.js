@@ -1,4 +1,4 @@
-const activityController = require('../controllers/activity_controller');
+const activityController = require('../../controllers/activity_controller');
 
 const express = require('express');
 const router = express.Router();

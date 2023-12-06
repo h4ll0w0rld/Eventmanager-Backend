@@ -1,4 +1,4 @@
-const shiftController = require('../controllers/shift_controller');
+const shiftController = require('../../controllers/shift_controller');
 
 const express = require('express');
 const router = express.Router();

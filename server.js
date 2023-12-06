@@ -3,10 +3,23 @@ const bodyParser = require('body-parser');
 const db = require("./src/models");
 const cors = require('cors');
 
+const corsOptions = require('./config/corsOptions').corsOptions;
+const credentials = require('./src/middleware/credentials_middleware').credentials;
+const logoutRoute = require('./src/routes/logout_router');
+const registerRoute = require('./src/routes/register_router');
+const authRoute = require('./src/routes/auth_router');
+const refreshRoute = require('./src/routes/refresh_router');
+const verifyJWT = require('./src/middleware/verifyJWT');
+const cookieParser = require('cookie-parser');
+const shiftCategoryRoute = require('./src/routes/api/shiftCategory_router');
+const eventRoute = require('./src/routes/api/event_router');
+const userRoute = require('./src/routes/api/user_router');
+const shiftRoute = require('./src/routes/api/shift_router');
+const activityRoute = require('./src/routes/api/activity_router');
+const errorHandling = require('./src/middleware/error_middleware');
 
 
 
-//was here :)
 
 // initialize express
 const app = express();
@@ -17,18 +30,21 @@ const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+//middleware for cookies
+app.use(cookieParser());
 
-//cors setups
-const corsOptions = {
-    origin: '*', // Specify the allowed origin(s)
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify the allowed HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Specify the allowed headers
-};
+
+//cors setup
+app.use(credentials);
 app.use(cors(corsOptions))
 
 app.options('*', cors());
 
 
+app.use('/logout', logoutRoute);
+app.use('/register', registerRoute);
+app.use('/auth', authRoute);
+app.use('/refresh', refreshRoute);
 /*
 *******
 *******
@@ -37,8 +53,8 @@ Middleware
 *******
 */
 
-const baseAuth = require('./src/middleware/basic_auth_middleware');
-app.use(baseAuth.basicAuth);
+app.use(verifyJWT.verifyJWT);
+
 /*
 *******
 *******
@@ -48,20 +64,15 @@ Routes
 */
 
 // define route files
-const shiftCategoryRoute = require('./src/routes/shiftCategory_router');
 app.use('/shiftCategory', shiftCategoryRoute);
 
 
-const eventRoute = require('./src/routes/event_router');
 app.use('/event', eventRoute);
 
-const userRoute = require('./src/routes/user_router');
 app.use('/user', userRoute);
 
-const shiftRoute = require('./src/routes/shift_router');
 app.use('/shift', shiftRoute);
 
-const activityRoute = require('./src/routes/activity_router');
 app.use('/activity', activityRoute);
 
 
@@ -80,12 +91,10 @@ Error Handling
 */
 
 
-// import error controller
-const errorController = require('./src/controllers/error_controller');
 // error handling
-app.use(errorController.get400);
-app.use(errorController.get404);
-app.use(errorController.get500);
+app.use(errorHandling.get400);
+app.use(errorHandling.get404);
+app.use(errorHandling.get500);
 
 //close database connection on shutdown
 const shutdown = () => {

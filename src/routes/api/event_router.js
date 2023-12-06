@@ -1,4 +1,4 @@
-const eventController = require('../controllers/event_controller');
+const eventController = require('../../controllers/event_controller');
 
 const express = require('express');
 const router = express.Router();
