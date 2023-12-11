@@ -21,11 +21,11 @@ module.exports = (sequelize, DataTypes) => {
                 return moment(this.getDataValue('endTime')).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm');
             }
         },
-        isActive: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: true
-        }
+        // isActive: {
+        //     type: DataTypes.BOOLEAN,
+        //     allowNull: false,
+        //     defaultValue: true
+        // }
     })
 
     return Shift

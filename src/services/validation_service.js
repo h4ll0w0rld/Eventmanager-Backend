@@ -8,6 +8,7 @@ const ShiftCategory = db.shift_category;
 const Shift = db.shift;
 const User = db.user;
 const Activity = db.activity;
+const UserEvent = db.userEvent;
 
 
 
@@ -57,8 +58,149 @@ const isUserAvailable = async (user_id, activity_id) => {
 }
 
 
+/*****
+ * 
+ * GET Param checks
+ * 
+ * 
+ ********/
+
+const isShiftCategoryInEvent = async (shift_category_id, event_id) => {
+    try {
+        const shift_category = await ShiftCategory.findOne(
+            {
+                include: [
+                    {
+                        model: Event,
+                        as: "event",
+                        where: {
+                            id: event_id
+                        }
+                    }
+                ],
+                where: {
+                    id: shift_category_id
+                }
+            }
+        )
+        if (!shift_category) {
+            throw Object.assign(new Error("Shift Category not found (validationService)"), { statusCode: 400 });
+        } if (!shift_category.event) {
+            throw Object.assign(new Error("Shift Category is not in Event (validationService)"), { statusCode: 400 });
+        }
+        return shift_category;
+    }
+    catch (err) {
+        throw err;
+    }
+}
+
+const isShiftInEvent = async (shift_id, shift_category_id, event_id) => {
+    try {
+        const shift = await Shift.findOne(
+            {
+                include: [
+                    {
+                        model: ShiftCategory,
+                        as: "shift_category",
+                        include: [
+                            {
+                                model: Event,
+                                as: "event",
+                                where: {
+                                    id: event_id
+                                }
+                            }
+                        ],
+                        where: {
+                            id: shift_category_id
+                        }
+                    }
+                ],
+                where: {
+                    id: shift_id
+                }
+            }
+        )
+        if (!shift) {
+            throw Object.assign(new Error("Shift not found (validationService)"), { statusCode: 400 });
+        } if (!shift.shift_category) {
+            throw Object.assign(new Error("Shift is not in Shift Category (validationService)"), { statusCode: 400 });
+        } if (!shift.shift_category.event) {
+            throw Object.assign(new Error("Shift is not in Event (validationService)"), { statusCode: 400 });
+        }
+        return shift;
+    }
+    catch (err) {
+        throw err;
+    }
+}
 
 
+const isActivityInEvent = async (activity_id, shift_category_id, event_id) => {
+    try {
+        const activity = await Activity.findOne(
+            {
+                include: [
+                    {
+                        model: Shift,
+                        as: "shift",
+                        include: [
+                            {
+                                model: ShiftCategory,
+                                as: "shift_category",
+                                include: [
+                                    {
+                                        model: Event,
+                                        as: "event",
+                                        where: {
+                                            id: event_id
+                                        }
+                                    }
+                                ],
+                                where: {
+                                    id: shift_category_id
+                                }
+                            }
+                        ]
+                    }
+                ],
+                where: {
+                    id: activity_id
+                }
+            }
+        )
+        if (!activity) {
+            throw Object.assign(new Error("Activity not found (validationService)"), { statusCode: 400 });
+        } if (!activity.shift_category) {
+            throw Object.assign(new Error("Activity is not the specified Shift Category (validationService)"), { statusCode: 400 });
+        } if (!activity.shift_category.event) {
+            throw Object.assign(new Error("Activity is not in Event (validationService)"), { statusCode: 400 });
+        }
+        return activity;
+    }
+    catch (err) {
+        throw err;
+    }
+}
+
+const isUserinEvent = async (user_id, event_id) => {
+    try {
+        const userEvent = await UserEvent.findOne({
+            where: {
+                UserId: user_id,
+                EventId: event_id
+            }
+        });
+        if (!userEvent) {
+            throw Object.assign(new Error("User is not in Event (validationService)"), { statusCode: 400 });
+        }
+        return userEvent;
+    }
+    catch (err) {
+        throw err;
+    }
+}
 
 
 
@@ -68,40 +210,6 @@ const isUserAvailable = async (user_id, activity_id) => {
  * 
  *  ******/
 
-const isRegisterValid = async (user) => {
-    try {
-        if (user.firstName && user.lastName && user.emailAddress && user.password) {
-            if (user.password.length < 8) {
-                const error = new Error("Password must be at least 8 characters long (validationService)");
-                error.statusCode = 400;
-                throw error;
-            }
-        } else {
-            throw Object.assign(new Error("Missing required fields! (validationService)"), { statusCode: 400 });
-        }
-    }
-    catch (err) {
-        throw err;
-    }
-}
-
-const isLoginValid = async (info) => {
-    try {
-        if (info.emailAddress && info.password) {
-            const user = await User.findOne({ where: { emailAddress: info.emailAddress } });
-            if (!user) {
-                throw Object.assign(new Error("User not found! (validationService)"), { statusCode: 404 });
-            } else {
-                return user;
-            }
-        } else {
-            throw Object.assign(new Error("Missing required fields! (validationService)"), { statusCode: 400 });
-        }
-    }
-    catch (err) {
-        throw err;
-    }
-}
 
 const isAddEventValid = async (event) => {
     try {
@@ -270,7 +378,11 @@ const isActivityIDValid = async (activity_id) => {
 
 const isUserIDValid = async (user_id) => {
     try {
-        let user = await User.findOne({ where: { id: user_id } });
+        let user = await User.findOne(
+            {
+                where: { id: user_id },
+                exclude: ['password', 'refreshToken']
+            });
         if (!user) {
             throw Object.assign(new Error("User not found! (validationService)"), { statusCode: 404 });
         }
@@ -351,8 +463,10 @@ const isTimeValid = (time) => {
 
 module.exports = {
     isUserAvailable,
-    isRegisterValid,
-    isLoginValid,
+    isShiftCategoryInEvent,
+    isShiftInEvent,
+    isActivityInEvent,
+    isUserinEvent,
     isAddShiftCategoryValid,
     isAddEventValid,
     isEventIDValid,

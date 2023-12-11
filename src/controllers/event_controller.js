@@ -11,30 +11,18 @@ const Shift = db.shift;
 const UserEvent = db.userEvent;
 
 
-// GET ALL Events
-const getAllEvents = async (req, res, next) => {
-    try {
-        let events = await Event.findAll(
-            {
-                order: [['name', 'ASC']],
-            }
-        )
-        res.status(200).send(events)
-    } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
-    }
-}
+
 
 
 const getAllUsersByEvent = async (req, res, next) => {
-    let eventId = req.params.event_id;
+    let eventId = req.params.current_event_id;
     try {
         const event = await validationService.isEventIDValid(eventId);
         let users = await event.getUsers({
-            order: [['lastName', 'ASC'], ['firstName', 'ASC']]
+            attributes: {
+                exclude: ['password', 'refreshToken']
+            },
+            order: [['lastName', 'ASC'], ['firstName', 'ASC']],
         });
         res.status(200).send(users)
     } catch (error) {
@@ -49,6 +37,7 @@ const getAllUsersByEvent = async (req, res, next) => {
 
 // ADD NEW Event
 const addEvent = async (req, res, next) => {
+    const currentUserId = req.currentUserId;
     let info = {
         name: req.body.name,
         description: req.body.description,
@@ -56,25 +45,30 @@ const addEvent = async (req, res, next) => {
         endDate: req.body.endDate,
         location: req.body.location,
     }
+    let event;
     try {
         await validationService.isAddEventValid(info);
-        const event = await Event.create(info)
+        await db.sequelize.transaction(async (t) => {
+            event = await Event.create(info, { transaction: t });
+            await UserEvent.create({ UserId: currentUserId, EventId: event.id, admin: true, user: true }, { transaction: t });
+        })
         res.status(201).send({ message: "successful created new Event", data: event })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
+        console.log("catched");
         next(error);
     }
 }
 
 //Delete Event by ID
 const deleteEventById = async (req, res, next) => {
-    let eventId = req.params.event_id;
+    let eventId = req.params.current_event_id;
 
     try {
         await validationService.isEventIDValid(eventId);
-        const event = await Event.destroy({
+        await Event.destroy({
             where: {
                 id: eventId
             }
@@ -89,7 +83,7 @@ const deleteEventById = async (req, res, next) => {
 }
 
 const addUserToEvent = async (req, res, next) => {
-    let eventId = req.params.event_id;
+    let eventId = req.params.current_event_id;
     let userId = req.params.user_id;
     try {
         const event = await validationService.isEventIDValid(eventId);
@@ -113,39 +107,40 @@ const addUserToEvent = async (req, res, next) => {
 }
 
 const removeUserFromEvent = async (req, res, next) => {
-    let eventId = req.params.event_id;
+    let eventId = req.params.current_event_id;
     let userId = req.params.user_id;
     try {
         const event = await validationService.isEventIDValid(eventId);
         const user = await validationService.isUserIDValid(userId);
+        db.sequelize.transaction(async (t) => {
+            //remove the user from all activities of the event
+            Activity.findAll({
+                include: [
+                    {
+                        model: Shift,
+                        as: "shift",
+                        include: [
+                            {
+                                model: ShiftCategory,
+                                as: "shift_category",
+                            }
+                        ]
+                    }
+                ],
+                where: {
+                    user_id: user.id,
+                    '$shift.shift_category.event_id$': event.id
 
-        //remove the user from all activities of the event
-        Activity.findAll({
-            include: [
-                {
-                    model: Shift,
-                    as: "shift",
-                    include: [
-                        {
-                            model: ShiftCategory,
-                            as: "shift_category",
-                        }
-                    ]
-                }
-            ],
-            where: {
-                user_id: user.id,
-                '$shift.shift_category.event_id$': event.id
-
-            }
-        }).then(activities => {
-            activities.forEach(activity => {
-                activity.update({ user_id: null })
+                },
+                transaction: t
+            }).then(activities => {
+                activities.forEach(activity => {
+                    activity.update({ user_id: null }, { transaction: t })
+                })
             })
+
+            await UserEvent.destroy({ where: { UserId: user.id, EventId: event.id }, transaction: t });
         })
-
-        await UserEvent.destroy({ where: { UserId: user.id, EventId: event.id } });
-
         res.status(204).send({ message: "successful removed User from Event" })
     } catch (error) {
         if (!error.statusCode) {
@@ -159,7 +154,6 @@ const removeUserFromEvent = async (req, res, next) => {
 
 
 module.exports = {
-    getAllEvents: getAllEvents,
     getAllUsersByEvent: getAllUsersByEvent,
     addEvent: addEvent,
     deleteEventById: deleteEventById,

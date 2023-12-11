@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const db = require('../../models');
 const validationService = require('../../services/validation_service');
+const authService = require('../../services/auth_service');
 
 
 
@@ -17,7 +18,7 @@ const handleLogin = async (req, res, next) => {
     }
     try {
         //validate input and get user
-        const user = await validationService.isLoginValid(info);
+        const user = await authService.isLoginValid(info);
         //compare password
         const isPasswordValid = await bcrypt.compare(info.password, user.password);
         if (!isPasswordValid) {
@@ -32,7 +33,7 @@ const handleLogin = async (req, res, next) => {
                 },
                 process.env.ACCESS_TOKEN_SECRET,
                 {
-                    expiresIn: '15m'
+                    expiresIn: '5m'
                 }
             );
             const refreshToken = jwt.sign(

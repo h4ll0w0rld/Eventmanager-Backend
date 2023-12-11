@@ -15,11 +15,13 @@ const sequelize = db.Sequelize;
 // Add new Activity
 const addActivity = async (req, res, next) => {
     let info = {
-        shift_id: req.body.shift_id,
+        shift_id: req.params.shift_id,
+        shift_category_id: req.params.shift_category_id,
+        event_id: req.params.current_event_id,
     }
     try {
-        await validationService.isShiftIDValid(info.shift_id);
-        const activity = await Activity.create(info)
+        await validationService.isShiftInEvent(info.shift_id, info.shift_category_id, info.event_id);
+        const activity = await Activity.create(info.shift_id)
         res.status(201).send({ message: "successful created new Activity", data: activity })
     } catch (error) {
         if (!error.statusCode) {
@@ -33,10 +35,11 @@ const addActivity = async (req, res, next) => {
 // GET Available Users
 const getAvailableUsers = async (req, res, next) => {
     let activity_id = req.params.activity_id;
-    let event_id = req.params.event_id;
+    let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
     try {
         // check if activity exists
-        await validationService.isActivityIDValid(activity_id);
+        await validationService.isActivityInEvent(activity_id, shift_category_id, event_id);
         const event = await validationService.isEventIDValid(event_id);
         // get activity with shift
         const activity = await Activity.findOne({
@@ -75,7 +78,10 @@ const getAvailableUsers = async (req, res, next) => {
             // find all users
             const allUsers = await event.getUsers(
                 {
-                    order: [['lastName', 'ASC'], ['firstName', 'ASC']]
+                    order: [['lastName', 'ASC'], ['firstName', 'ASC']],
+                    attributes: {
+                        exclude: ['emailAddress', 'password', 'refreshToken'],
+                    }
                 }
             );
             // filter all users by unavailable users
@@ -95,24 +101,11 @@ const getAvailableUsers = async (req, res, next) => {
 // Add User to Activity
 const addUserToActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
+    let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
     let user_id = req.params.user_id;
     try {
-        await validationService.isActivityIDValid(activity_id);
-        let activity = await Activity.findOne({
-            include: [
-                {
-                    model: Shift,
-                    as: "shift",
-                    include: [
-                        {
-                            model: ShiftCategory,
-                            as: "shift_category",
-                        }
-                    ]
-                }
-            ],
-            where: { id: activity_id }
-        });
+        let activity = await validationService.isActivityInEvent(activity_id, shift_category_id, event_id);
         // check if user is in the same event
         let userEvent = await UserEvent.findOne({
             where: {
@@ -128,7 +121,6 @@ const addUserToActivity = async (req, res, next) => {
             throw Object.assign(new Error('Activity already has an user!'), { statusCode: 400 });
         } else {
             // if user doesn't exist
-            await validationService.isUserIDValid(user_id);
             await validationService.isUserAvailable(user_id, activity_id);
             await activity.update({ user_id: user_id });
             res.status(204).send({ message: "successful added User to Activity" })
@@ -145,8 +137,13 @@ const addUserToActivity = async (req, res, next) => {
 
 const removeUserFromActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
+    let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
     try {
-        await validationService.isActivityIDValid(activity_id);
+        const activity = await validationService.isActivityInEvent(activity_id, shift_category_id, event_id);
+        if (activity.user_id !== req.currentUserId && !req.roles.admin && !req.roles.editor.includes(shift_category_id)) {
+            throw Object.assign(new Error('Forbidden'), { statusCode: 403 });
+        }
         await Activity.update({ user_id: null }, { where: { id: activity_id } })
         res.status(204).send({ message: "successful deleted User from Activity" })
     } catch (error) {
@@ -164,8 +161,9 @@ const removeUserFromActivity = async (req, res, next) => {
 
 const getActivitiesByShiftCategory = async (req, res, next) => {
     let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
     try {
-        await validationService.isShiftCategoryIDValid(shift_category_id);
+        await validationService.isShiftCategoryInEvent(shift_category_id, event_id);
         let activities = await Activity.findAll({
             include: [
                 {

@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const db = require("./src/models");
 const cors = require('cors');
 
@@ -9,13 +10,13 @@ const logoutRoute = require('./src/routes/logout_router');
 const registerRoute = require('./src/routes/register_router');
 const authRoute = require('./src/routes/auth_router');
 const refreshRoute = require('./src/routes/refresh_router');
-const verifyJWT = require('./src/middleware/verifyJWT');
-const cookieParser = require('cookie-parser');
+const verifyJWT = require('./src/middleware/verifyJWT').verifyJWT;
 const shiftCategoryRoute = require('./src/routes/api/shiftCategory_router');
-const eventRoute = require('./src/routes/api/event_router');
-const userRoute = require('./src/routes/api/user_router');
 const shiftRoute = require('./src/routes/api/shift_router');
 const activityRoute = require('./src/routes/api/activity_router');
+const userRoute = require('./src/routes/api/user_router');
+const eventRoute = require('./src/routes/api/event_router');
+const permissionRoute = require('./src/routes/api/permission_router');
 const errorHandling = require('./src/middleware/error_middleware');
 
 
@@ -53,28 +54,15 @@ Middleware
 *******
 */
 
-app.use(verifyJWT.verifyJWT);
-
-/*
-*******
-*******
-Routes
-*******
-*******
-*/
-
-// define route files
+//authenticates the user
+app.use(verifyJWT);
+//checks for authorization
 app.use('/shiftCategory', shiftCategoryRoute);
-
-
-app.use('/event', eventRoute);
-
-app.use('/user', userRoute);
-
 app.use('/shift', shiftRoute);
-
 app.use('/activity', activityRoute);
-
+app.use('/user', userRoute);
+app.use('/event', eventRoute);
+app.use('/permission', permissionRoute);
 
 
 

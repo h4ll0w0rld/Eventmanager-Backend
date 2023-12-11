@@ -21,7 +21,7 @@ const addShiftCategory = async (req, res, next) => {
     let info = {
         name: req.body.name,
         description: req.body.description,
-        event_id: req.body.event_id,
+        event_id: req.params.current_event_id,
         shiftBlocks: req.body.shiftBlocks
     }
     try {
@@ -54,8 +54,10 @@ const addShiftCategory = async (req, res, next) => {
 // ADD a new Shiftblock to excisting Shift_Category
 const addShiftBlock = async (req, res, next) => {
     const shift_category_id = req.params.shift_category_id;
+    const event_id = req.params.current_event_id;
     const shiftBlocks = req.body.shiftBlocks;
     try {
+        await validationService.isShiftCategoryInEvent(shift_category_id, event_id);
         await validationService.isAddShiftBlockToCategoryValid(shift_category_id, shiftBlocks);
         const shifts = shiftController.getShiftArray(shiftBlocks);
         shifts.forEach(shift => {
@@ -83,8 +85,9 @@ const addShiftBlock = async (req, res, next) => {
 
 const deleteShiftCategory = async (req, res, next) => {
     let id = req.params.id;
+    let event_id = req.params.current_event_id;
     try {
-        await validationService.isShiftCategoryIDValid(id);
+        await validationService.isShiftCategoryInEvent(id, event_id);
         await ShiftCategory.destroy({ where: { id: id } });
         res.status(204).send({ message: "successful deleted Shift_Category" })
     } catch (error) {
@@ -99,7 +102,7 @@ const deleteShiftCategory = async (req, res, next) => {
 // GET Shift_Category Names by Event
 
 const getAllShiftCategoryNames = async (req, res, next) => {
-    let event_id = req.params.event_id;
+    let event_id = req.params.current_event_id;
     try {
         await validationService.isEventIDValid(event_id);
         let shiftCategories = await ShiftCategory.findAll(
@@ -122,8 +125,9 @@ const getAllShiftCategoryNames = async (req, res, next) => {
 
 const getShiftCategoryObjectById = async (req, res, next) => {
     let id = req.params.id;
+    let event_id = req.params.current_event_id;
     try {
-        await validationService.isShiftCategoryIDValid(id);
+        await validationService.isShiftCategoryInEvent(id, event_id);
         let shiftCategoryObject = await ShiftCategory.findOne(
             {
                 include: [{
@@ -136,7 +140,7 @@ const getShiftCategoryObjectById = async (req, res, next) => {
                             model: User,
                             as: "user",
                             attributes: {
-                                exclude: ['emailAddress'],
+                                exclude: ['emailAddress', 'password', 'refreshToken'],
                             }
                         }],
                     }],
@@ -160,7 +164,7 @@ const getShiftCategoryObjectById = async (req, res, next) => {
 // GET all Shift_Category content by Event
 
 const getAllShiftCategoriesByEvent = async (req, res, next) => {
-    let event_id = req.params.event_id;
+    let event_id = req.params.current_event_id;
     try {
         await validationService.isEventIDValid(event_id);
         let eventObject = await Event.findOne(
@@ -178,7 +182,7 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
                                 model: User,
                                 as: "user",
                                 attributes: {
-                                    exclude: ['emailAddress'],
+                                    exclude: ['emailAddress', 'password', 'refreshToken'],
                                 }
                             }],
                         }],

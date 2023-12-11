@@ -3,11 +3,15 @@ const validationService = require("../services/validation_service");
 
 // create main Model
 const User = db.user;
+const UserEvent = db.userEvent;
+const Activity = db.activity;
 
 // GET User by ID
 const getUserById = async (req, res, next) => {
+    let event_id = req.params.current_event_id;
     let id = req.params.id;
     try {
+        await validationService.isUserinEvent(id, event_id);
         let user = await validationService.isUserIDValid(id);
         res.status(200).send(user)
     } catch (error) {
@@ -28,23 +32,6 @@ const getEventsByUser = async (req, res, next) => {
             order: [['name', 'ASC']],
         });
         res.status(200).send(events)
-    } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
-    }
-}
-
-//GET all Users
-
-const getAllUsers = async (req, res, next) => {
-    try {
-        let users = await User.findAll(
-            {
-                order: [['lastName', 'ASC'], ['firstName', 'ASC']]
-            })
-        res.status(200).send(users)
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;
@@ -74,13 +61,19 @@ const deleteUserById = async (req, res, next) => {
 
 // ADD NEW User
 const addUser = async (req, res, next) => {
+    let event_id = req.params.current_event_id;
     let info = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         emailAddress: req.body.emailAddress,
     }
+    let user;
     try {
-        const user = await User.create(info)
+        await validationService.isEventIDValid(event_id);
+        db.sequelize.transaction(async (t) => {
+            user = await User.create(info, { transaction: t })
+            await user.addEvent(event_id, { transaction: t });
+        })
         res.status(201).send({ message: "successful created new User", data: user })
     } catch (error) {
         if (!error.statusCode) {
@@ -95,10 +88,41 @@ const addUser = async (req, res, next) => {
 }
 
 
+const claimUser = async (req, res, next) => {
+    let event_id = req.params.current_event_id;
+    let user_id = req.params.user_id;
+    let currentUserId = req.currentUserId;
+    let firstName = req.params.firstName;
+    let lastName = req.params.lastName;
+    try {
+        const userEvent = await validationService.isUserinEvent(user_id, event_id);
+        if (userEvent.user) {
+            throw Object.assign(new Error('User already claimed!'), { statusCode: 400 });
+        }
+        const user = await validationService.isUserIDValid(user_id);
+        if (user.firstName !== firstName || user.lastName !== lastName) {
+            throw Object.assign(new Error('Name does not match!'), { statusCode: 400 });
+        }
+        await db.sequelize.transaction(async (t) => {
+            await UserEvent.create({ UserId: currentUserId, EventId: event_id, user: true }, { transaction: t });
+            await Activity.update({ UserId: currentUserId }, { where: { UserId: user_id } }, { transaction: t });
+            await UserEvent.destroy({ where: { UserId: user_id, EventId: event_id } }, { transaction: t });
+            await User.destroy({ where: { id: user_id } }, { transaction: t });
+        })
+        res.status(204).send({ message: "successful claimed User" })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    }
+}
+
+
 module.exports = {
     getUserById: getUserById,
     getEventsByUser: getEventsByUser,
-    getAllUsers: getAllUsers,
     deleteUserById: deleteUserById,
-    addUser: addUser
+    addUser: addUser,
+    claimUser: claimUser
 }

@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
+const db = require('../models');
+const User = db.user;
 require('dotenv').config();
 
-const verifyJWT = (req, res, next) => {
+const verifyJWT = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
         if (!authHeader) {
@@ -16,14 +18,19 @@ const verifyJWT = (req, res, next) => {
             (err, decoded) => {
                 if (err) {
                     const error = new Error('Not authenticated');
-                    error.statusCode = 403;
+                    error.statusCode = 401;
                     throw error;
                 }
-                req.userId = decoded.id;
-                next();
+                req.currentUserId = decoded.id;
             }
-
         )
+        const user = await User.findOne({ where: { id: req.currentUserId } });
+        if (!user) {
+            const error = new Error('Logged in User does not exist anymore');
+            error.statusCode = 401;
+            throw error;
+        }
+        next();
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500;

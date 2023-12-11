@@ -36,7 +36,33 @@ db.shift_category = require('./sequelize_models/shift_category.js')(sequelize, D
 db.shift = require('./sequelize_models/shift.js')(sequelize, DataTypes);
 db.status = require('./sequelize_models/status.js')(sequelize, DataTypes);
 db.activity = require('./sequelize_models/activity.js')(sequelize, DataTypes);
-db.userEvent = sequelize.define('user_event', {});
+
+db.userEvent = sequelize.define('user_event', {
+    admin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    user: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    guest: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+});
+db.event.belongsToMany(db.user, { through: db.userEvent, onDelete: 'cascade' });
+db.user.belongsToMany(db.event, { through: db.userEvent, onDelete: 'cascade' });
+
+
+
+db.shiftCategoryEditor = sequelize.define('shift_category_editor')
+db.user.belongsToMany(db.shift_category, { through: db.shiftCategoryEditor, onDelete: 'cascade' });
+db.shift_category.belongsToMany(db.user, { through: db.shiftCategoryEditor, onDelete: 'cascade' });
+
+
+
+
 
 
 
@@ -85,9 +111,6 @@ db.shift.belongsTo(db.shift_category, {
     as: 'shift_category'
 });
 
-// test
-db.event.belongsToMany(db.user, { through: db.userEvent });
-db.user.belongsToMany(db.event, { through: db.userEvent });
 
 db.shift.hasMany(db.activity, {
     onDelete: 'cascade',

@@ -1,3 +1,4 @@
+
 module.exports = {
     HOST: 'localhost',
     USER: 'root',
@@ -10,5 +11,5 @@ module.exports = {
     PORT: 3306,
     DIALECT: 'mysql',
     TIMEZONE: '+00:00',
-    OverwriteOnSync: false
+    OverwriteOnSync: false,
 };

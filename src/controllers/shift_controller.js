@@ -11,11 +11,12 @@ const User = db.user;
 const Event = db.event;
 const ShiftCategory = db.shift_category;
 
-// GET ALL Shifts from Event
+// GET ALL Shifts from ShiftCategory
 const getAllShifts = async (req, res, next) => {
     let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
     try {
-        await validationService.isShiftCategoryIDValid(shift_category_id);
+        await validationService.isShiftCategoryInEvent(shift_category_id, event_id);
         let shifts = await Shift.findAll(
             {
                 order: [['startTime', 'ASC']],
@@ -66,26 +67,26 @@ const getShiftById = async (req, res, next) => {
 
 
 //PUT set Shift to active
-const setisActive = async (req, res, next) => {
-    let shift_id = req.params.shift_id;
-    let isActive = req.params.isActive;
-    try {
-        await validationService.isShiftIDValid(shift_id);
-        if (typeof isActive === "boolean") {
-            throw Object.assign(new Error('isActive must be a boolean!'), { statusCode: 400 });
-        }
-        await Shift.update(
-            { isActive: isActive },
-            { where: { id: shift_id } }
-        )
-        res.status(204).send({ message: "Shift set to active" });
-    } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
-    }
-}
+// const setisActive = async (req, res, next) => {
+//     let shift_id = req.params.shift_id;
+//     let isActive = req.params.isActive;
+//     try {
+//         await validationService.isShiftIDValid(shift_id);
+//         if (typeof isActive === "boolean") {
+//             throw Object.assign(new Error('isActive must be a boolean!'), { statusCode: 400 });
+//         }
+//         await Shift.update(
+//             { isActive: isActive },
+//             { where: { id: shift_id } }
+//         )
+//         res.status(204).send({ message: "Shift set to active" });
+//     } catch (error) {
+//         if (!error.statusCode) {
+//             error.statusCode = 500;
+//         }
+//         next(error);
+//     }
+// }
 
 
 
@@ -95,10 +96,9 @@ const setisActive = async (req, res, next) => {
 
 const getShiftsByUserAndEvent = async (req, res, next) => {
     let user_id = req.params.user_id;
-    let event_id = req.params.event_id;
+    let event_id = req.params.current_event_id;
     try {
-        await validationService.isUserIDValid(user_id);
-        await validationService.isEventIDValid(event_id);
+        await validationService.isUserinEvent(user_id, event_id)
         let shifts = await Shift.findAll(
             {
                 include: [
@@ -183,7 +183,7 @@ const getShiftArray = (shiftBlocks) => {
 module.exports = {
     getAllShifts: getAllShifts,
     getShiftById: getShiftById,
-    setisActive: setisActive,
+    // setisActive: setisActive,
     getShiftsByUserAndEvent: getShiftsByUserAndEvent,
     getShiftArray: getShiftArray
 }

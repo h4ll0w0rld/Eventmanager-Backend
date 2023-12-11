@@ -10,6 +10,20 @@ Node v19.7.0
 npm install
 ```
 
+2. Create a .env file in the root directory and add the following variables:
+```shell
+ACCESS_TOKEN_SECRET={your Token}
+REFRESH_TOKEN_SECRET={your Token}
+```
+
+to generate a Token you can use this in your console:
+
+```shell
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+generate a Token for the ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET
+
 ## Start the App
 Type the following command to run nodemon and the ExpressServer
 ```shell

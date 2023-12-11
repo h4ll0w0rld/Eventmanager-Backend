@@ -1,15 +1,15 @@
 const userController = require('../../controllers/user_controller');
-const registerController = require('../../controllers/authentification/register_controller');
-const authController = require('../../controllers/authentification/auth_controller');
+const permissionMiddleware = require('../../middleware/permission_middleware');
+const checkRole = require('../../middleware/checkRole_middleware').checkRole;
+
 
 const express = require('express');
 const router = express.Router();
 
-
-router.get('/id/:id', userController.getUserById);
-router.get('/eventsByUser/user_id/:user_id', userController.getEventsByUser);
-router.get('/all', userController.getAllUsers);
-router.delete('/delete/user_id/:user_id', userController.deleteUserById);
-router.post('/add', userController.addUser);
+router.get('/eventsByUser/user_id/:user_id', permissionMiddleware.checkCurrentUser, userController.getEventsByUser);
+router.delete('/delete/user_id/:user_id', permissionMiddleware.checkCurrentUser, userController.deleteUserById);
+router.get('/:current_event_id/id/:id', checkRole, permissionMiddleware.checkCurrentUserOrAdmin, userController.getUserById);
+router.post('/:current_event_id/add', checkRole, permissionMiddleware.checkAdmin, userController.addUser);
+router.get('/:current_event_id/claimUser/:user_id/:firstName/:lastName', userController.claimUser);
 
 module.exports = router;

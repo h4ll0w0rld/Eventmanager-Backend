@@ -1,6 +1,7 @@
 const db = require('../../models');
 const bcrypt = require('bcrypt');
 const validationService = require('../../services/validation_service');
+const authService = require('../../services/auth_service');
 
 
 
@@ -17,7 +18,7 @@ const registerNewUser = async (req, res, next) => {
     }
     try {
         //validate input
-        await validationService.isRegisterValid(info);
+        await authService.isRegisterValid(info);
         //encrypt password
         const hashedPassword = await bcrypt.hash(info.password, 10);
         //create user in database
@@ -41,34 +42,10 @@ const registerNewUser = async (req, res, next) => {
 }
 
 
-// const claimExistingUser = async (req, res, next) => {
-//     let user_id = req.params.user_id;
-//     try {
-//         //validate input and get user
-//         const user = await validationService.isUserIDValid(user_id);
-//         //update user in database
-//         await User.update({
-//             firstName: info.firstName,
-//             lastName: info.lastName,
-//             emailAddress: info.emailAddress,
-//             password: hashedPassword
-//         }, { where: { id: info.id } });
-//         res.status(200).send({ message: "successful claimed excisting new User", data: user })
-//     } catch (error) {
-//         if (!error.statusCode) {
-//             error.statusCode = 500;
-//         }
-//         if (error.name === 'SequelizeUniqueConstraintError') {
-//             error.message = "Email address already exists";
-//             error.statusCode = 409;
-//         }
-//         next(error);
-//     }
-// }
+
 
 
 
 module.exports = {
     registerNewUser,
-    // claimExistingUser
 }
