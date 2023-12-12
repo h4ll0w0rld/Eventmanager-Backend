@@ -1,5 +1,5 @@
 const db = require("../models");
-
+const handleError = require("../services/error_service").handleErrors;
 const validationService = require("../services/validation_service");
 
 // create main Model
@@ -26,10 +26,7 @@ const getAllUsersByEvent = async (req, res, next) => {
         });
         res.status(200).send(users)
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "eventController"));
     }
 }
 
@@ -54,11 +51,7 @@ const addEvent = async (req, res, next) => {
         })
         res.status(201).send({ message: "successful created new Event", data: event })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        console.log("catched");
-        next(error);
+        next(handleError(error, "eventController"));
     }
 }
 
@@ -75,10 +68,7 @@ const deleteEventById = async (req, res, next) => {
         })
         res.status(204).send({ message: "successful deleted Event" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "eventController"));
     }
 }
 
@@ -101,7 +91,7 @@ const addUserToEvent = async (req, res, next) => {
                 error.statusCode = 500;
             }
         } finally {
-            next(error);
+            next(handleError(error, "eventController"));
         }
     }
 }
@@ -143,10 +133,7 @@ const removeUserFromEvent = async (req, res, next) => {
         })
         res.status(204).send({ message: "successful removed User from Event" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "eventController"));
     }
 }
 

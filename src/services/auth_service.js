@@ -1,5 +1,5 @@
 const db = require("../models");
-
+const handleError = require("./error_service").handleErrors;
 
 const User = db.user;
 
@@ -16,8 +16,8 @@ const isRegisterValid = async (user) => {
             throw Object.assign(new Error("Missing required fields! (validationService)"), { statusCode: 400 });
         }
     }
-    catch (err) {
-        throw err;
+    catch (error) {
+        throw handleError(error, "authService");
     }
 }
 
@@ -34,8 +34,8 @@ const isLoginValid = async (info) => {
             throw Object.assign(new Error("Missing required fields! (validationService)"), { statusCode: 400 });
         }
     }
-    catch (err) {
-        throw err;
+    catch (error) {
+        throw handleError(error, "authService");
     }
 }
 

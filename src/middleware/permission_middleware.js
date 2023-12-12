@@ -1,4 +1,4 @@
-
+const handleError = require("../services/error_service").handleErrors;
 
 const checkAdmin = (req, res, next) => {
     try {
@@ -7,13 +7,10 @@ const checkAdmin = (req, res, next) => {
         } else {
             const error = new Error("Unauthorized: Admin privileges required");
             error.statusCode = 403;
-            next(error);
+            next(handleError(error, "permissionMiddleware"));
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "permissionMiddleware"));
     }
 }
 
@@ -25,13 +22,10 @@ const checkGuest = (req, res, next) => {
         } else {
             const error = new Error("Unauthorized: Guest privileges required");
             error.statusCode = 403;
-            next(error);
+            next(handleError(error, "permissionMiddleware"));
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "permissionMiddleware"));
     }
 }
 
@@ -42,13 +36,10 @@ const checkUser = (req, res, next) => {
         } else {
             const error = new Error("Unauthorized: User privileges required");
             error.statusCode = 403;
-            next(error);
+            next(handleError(error, "permissionMiddleware"));
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "permissionMiddleware"));
     }
 }
 
@@ -60,13 +51,10 @@ const checkEditor = (req, res, next) => {
         } else {
             const error = new Error("Unauthorized: Editor privileges required");
             error.statusCode = 403;
-            next(error);
+            next(handleError(error, "permissionMiddleware"));
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "permissionMiddleware"));
     }
 }
 
@@ -77,13 +65,10 @@ const checkCurrentUser = (req, res, next) => {
         } else {
             const error = new Error("Unauthorized: Only the User can access this route");
             error.statusCode = 403;
-            next(error);
+            next(handleError(error, "permissionMiddleware"));
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "permissionMiddleware"));
     }
 }
 
@@ -94,13 +79,10 @@ const checkCurrentUserOrEditor = (req, res, next) => {
         } else {
             const error = new Error("Unauthorized: Only the User or Editor can access this route");
             error.statusCode = 403;
-            next(error);
+            next(handleError(error, "permissionMiddleware"));
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "permissionMiddleware"));
     }
 }
 
@@ -111,13 +93,10 @@ const checkCurrentUserOrAdmin = (req, res, next) => {
         } else {
             const error = new Error("Unauthorized: Only the User or Admin can access this route");
             error.statusCode = 403;
-            next(error);
+            next(handleError(error, "permissionMiddleware"));
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "permissionMiddleware"));
     }
 }
 

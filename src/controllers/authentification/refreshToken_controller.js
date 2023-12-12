@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-
+const handleError = require('../../services/error_service').handleErrors;
 const db = require('../../models');
 
 
@@ -19,8 +19,8 @@ const handleRefreshToken = async (req, res, next) => {
         const refreshToken = cookies.jwt;
         const user = await User.findOne({ where: { refreshToken: refreshToken } });
         if (!user) {
-            const error = new Error("Forbidden");
-            error.statusCode = 403;
+            const error = new Error("refresh Token does not exist");
+            error.statusCode = 401;
             throw error;
         }
         //evaluate jwt
@@ -29,8 +29,8 @@ const handleRefreshToken = async (req, res, next) => {
             process.env.REFRESH_TOKEN_SECRET,
             (err, decoded) => {
                 if (err || user.id !== decoded.id) {
-                    const error = new Error('Forbidden');
-                    error.statusCode = 403;
+                    const error = new Error('refresh Token is not valid');
+                    error.statusCode = 401;
                     throw error;
                 }
                 const accessToken = jwt.sign(
@@ -46,10 +46,7 @@ const handleRefreshToken = async (req, res, next) => {
             }
         )
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "refreshTokenController"));
     }
 }
 

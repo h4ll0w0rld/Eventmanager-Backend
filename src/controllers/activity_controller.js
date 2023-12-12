@@ -1,6 +1,6 @@
 const db = require("../models");
 const validationService = require("../services/validation_service");
-
+const handleError = require("../services/error_service").handleErrors;
 // create main Model
 const Activity = db.activity;
 const User = db.user;
@@ -24,10 +24,7 @@ const addActivity = async (req, res, next) => {
         const activity = await Activity.create(info.shift_id)
         res.status(201).send({ message: "successful created new Activity", data: activity })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "activityController"));
     }
 }
 
@@ -89,10 +86,7 @@ const getAvailableUsers = async (req, res, next) => {
             res.status(200).send(availableUsers);
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "activityController"));
     }
 }
 
@@ -126,10 +120,7 @@ const addUserToActivity = async (req, res, next) => {
             res.status(204).send({ message: "successful added User to Activity" })
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "activityController"));
     }
 }
 
@@ -147,10 +138,7 @@ const removeUserFromActivity = async (req, res, next) => {
         await Activity.update({ user_id: null }, { where: { id: activity_id } })
         res.status(204).send({ message: "successful deleted User from Activity" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "activityController"));
     }
 }
 
@@ -176,10 +164,7 @@ const getActivitiesByShiftCategory = async (req, res, next) => {
         )
         res.status(200).send(activities)
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "activityController"));
     }
 }
 

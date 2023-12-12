@@ -1,5 +1,6 @@
 const db = require('../../models');
 const bcrypt = require('bcrypt');
+const handleError = require('../../services/error_service').handleErrors;
 const validationService = require('../../services/validation_service');
 const authService = require('../../services/auth_service');
 
@@ -30,14 +31,11 @@ const registerNewUser = async (req, res, next) => {
         });
         res.status(201).send({ message: "successful created new User", data: user })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
         if (error.name === 'SequelizeUniqueConstraintError') {
             error.message = "Email address already exists";
             error.statusCode = 409;
         }
-        next(error);
+        next(handleError(error, "registerController"));
     }
 }
 

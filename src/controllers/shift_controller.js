@@ -1,5 +1,6 @@
 const db = require("../models");
 const validationService = require("../services/validation_service");
+const handleError = require("../services/error_service").handleErrors;
 
 const moment = require('moment');
 
@@ -24,10 +25,7 @@ const getAllShifts = async (req, res, next) => {
             })
         res.status(200).send(shifts)
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftController"));
     }
 }
 
@@ -58,10 +56,7 @@ const getShiftById = async (req, res, next) => {
             });
         res.status(200).send(shift);
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftController"));
     }
 }
 
@@ -128,10 +123,7 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
             });
         res.status(200).send(shifts);
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftController"));
     }
 }
 
@@ -175,7 +167,7 @@ const getShiftArray = (shiftBlocks) => {
         })
         return shiftArray;
     } catch (error) {
-        throw error;
+        throw handleError(error, "shiftController");
     }
 }
 

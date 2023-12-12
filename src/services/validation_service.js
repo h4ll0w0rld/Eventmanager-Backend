@@ -1,6 +1,7 @@
 const moment = require('moment');
 
 const db = require("../models");
+const handleError = require("./error_service").handleErrors;
 const sequelize = db.Sequelize;
 
 const Event = db.event;
@@ -53,7 +54,7 @@ const isUserAvailable = async (user_id, activity_id) => {
             return true;
         }
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -91,7 +92,7 @@ const isShiftCategoryInEvent = async (shift_category_id, event_id) => {
         return shift_category;
     }
     catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -132,7 +133,7 @@ const isShiftInEvent = async (shift_id, shift_category_id, event_id) => {
         return shift;
     }
     catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -180,7 +181,7 @@ const isActivityInEvent = async (activity_id, shift_category_id, event_id) => {
         return activity;
     }
     catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -198,7 +199,7 @@ const isUserinEvent = async (user_id, event_id) => {
         return userEvent;
     }
     catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -218,7 +219,7 @@ const isAddEventValid = async (event) => {
         isTimeRangeValid(event.startDate, event.endDate);
         return true;
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -229,7 +230,7 @@ const isAddShiftCategoryValid = async (shiftCategory) => {
         areShiftBlocksValid(shiftBlocks, event);
         return true;
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -262,7 +263,7 @@ const isAddShiftBlockToCategoryValid = async (shift_category_id, shiftBlocks) =>
         };
         return true;
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -291,7 +292,7 @@ const areShiftBlocksValid = (shiftBlocks, event) => {
         });
         return true;
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -316,7 +317,7 @@ const isEventIDValid = async (id) => {
         }
     }
     catch (error) {
-        throw error;
+        throw handleError(error, "validationService");
     }
 }
 
@@ -332,7 +333,7 @@ const isShiftCategoryIDValid = async (id) => {
             return shiftCategory;
         }
     } catch (error) {
-        throw error;
+        throw handleError(error, "validationService");
     }
 }
 
@@ -347,7 +348,7 @@ const isShiftIDValid = async (shift_id) => {
             return shift;
         }
     } catch (error) {
-        throw error;
+        throw handleError(error, "validationService");
     }
 }
 
@@ -369,7 +370,7 @@ const isActivityIDValid = async (activity_id) => {
         }
         return activity;
     } catch (error) {
-        throw error;
+        throw handleError(error, "validationService");
     }
 }
 
@@ -388,7 +389,7 @@ const isUserIDValid = async (user_id) => {
         }
         return user;
     } catch (error) {
-        throw error;
+        throw handleError(error, "validationService");
     }
 }
 
@@ -412,7 +413,7 @@ const isDayinEvent = (day, event) => {
             throw Object.assign(new Error("Day is not in Event (validationService)"), { statusCode: 400 });
         }
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -430,7 +431,7 @@ const isTimeRangeDivisibleByIntervall = (startTime, endTime, intervall) => {
             throw Object.assign(new Error("Time range is not divisible by intervall (validationService)"), { statusCode: 400 });
         }
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -443,7 +444,7 @@ const isTimeRangeValid = (startTime, endTime) => {
             throw Object.assign(new Error("startTime must be before endTime (validationService)"), { statusCode: 400 });
         }
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 
@@ -456,7 +457,7 @@ const isTimeValid = (time) => {
             throw Object.assign(new Error("Time is not a valid format (YYYY-MM-DD HH:mm) (validationService)"), { statusCode: 400 });
         }
     } catch (err) {
-        throw err;
+        throw handleError(err, "validationService");
     }
 }
 

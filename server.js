@@ -80,8 +80,6 @@ Error Handling
 
 
 // error handling
-app.use(errorHandling.get400);
-app.use(errorHandling.get404);
 app.use(errorHandling.get500);
 
 //close database connection on shutdown

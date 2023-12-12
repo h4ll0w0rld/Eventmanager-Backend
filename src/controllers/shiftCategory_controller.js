@@ -2,6 +2,7 @@ const moment = require('moment-timezone');
 
 const db = require("../models");
 const validationService = require("../services/validation_service");
+const handleError = require("../services/error_service").handleErrors;
 const shiftController = require("../controllers/shift_controller");
 
 const Shift_Category_class = require("../models/classes/Shift_category");
@@ -44,10 +45,7 @@ const addShiftCategory = async (req, res, next) => {
         );
         res.status(201).send({ message: "successful created new Category", data: shiftCategory })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftCategoryController"));
     }
 }
 
@@ -73,10 +71,7 @@ const addShiftBlock = async (req, res, next) => {
         );
         res.status(201).send({ message: "successful added new Shifts" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftCategoryController"));
     }
 }
 
@@ -91,10 +86,7 @@ const deleteShiftCategory = async (req, res, next) => {
         await ShiftCategory.destroy({ where: { id: id } });
         res.status(204).send({ message: "successful deleted Shift_Category" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftCategoryController"));
     }
 }
 
@@ -112,10 +104,7 @@ const getAllShiftCategoryNames = async (req, res, next) => {
             });
         res.status(200).send(shiftCategories);
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftCategoryController"));
     }
 }
 
@@ -153,10 +142,7 @@ const getShiftCategoryObjectById = async (req, res, next) => {
             });
         res.status(200).send(shiftCategoryObject);
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftCategoryController"));
     }
 }
 
@@ -197,10 +183,7 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
             });
         res.status(200).send(eventObject);
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "shiftCategoryController"));
     }
 }
 

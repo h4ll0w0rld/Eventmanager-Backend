@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const db = require('../../models');
+const handleError = require('../../services/error_service').handleErrors;
 const validationService = require('../../services/validation_service');
 const authService = require('../../services/auth_service');
 
@@ -23,7 +24,7 @@ const handleLogin = async (req, res, next) => {
         const isPasswordValid = await bcrypt.compare(info.password, user.password);
         if (!isPasswordValid) {
             const error = new Error('Invalid password');
-            error.statusCode = 403;
+            error.statusCode = 401;
             throw error;
         } if (isPasswordValid) {
             //create JWTs
@@ -53,10 +54,7 @@ const handleLogin = async (req, res, next) => {
             res.status(200).send({ message: "successful login", accessToken: accessToken })
         }
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "authController"));
     }
 }
 

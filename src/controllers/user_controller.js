@@ -1,5 +1,6 @@
 const db = require("../models");
 const validationService = require("../services/validation_service");
+const handleError = require("../services/error_service").handleErrors;
 
 // create main Model
 const User = db.user;
@@ -15,10 +16,7 @@ const getUserById = async (req, res, next) => {
         let user = await validationService.isUserIDValid(id);
         res.status(200).send(user)
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "userController"));
     }
 }
 
@@ -33,10 +31,7 @@ const getEventsByUser = async (req, res, next) => {
         });
         res.status(200).send(events)
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "userController"));
     }
 }
 
@@ -49,10 +44,7 @@ const deleteUserById = async (req, res, next) => {
         let user = await User.destroy({ where: { id: user_id } })
         res.status(204).send({ message: "successful deleted User" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "userController"));
     }
 }
 
@@ -76,14 +68,11 @@ const addUser = async (req, res, next) => {
         })
         res.status(201).send({ message: "successful created new User", data: user })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
         if (error.name === 'SequelizeUniqueConstraintError') {
             error.message = "Email address already exists";
             error.statusCode = 409;
         }
-        next(error);
+        next(handleError(error, "userController"));
     }
 }
 
@@ -111,10 +100,7 @@ const claimUser = async (req, res, next) => {
         })
         res.status(204).send({ message: "successful claimed User" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "userController"));
     }
 }
 

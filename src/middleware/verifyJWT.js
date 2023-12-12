@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const db = require('../models');
 const User = db.user;
+const handleError = require('../services/error_service').handleErrors;
 require('dotenv').config();
 
 const verifyJWT = async (req, res, next) => {
@@ -32,10 +33,7 @@ const verifyJWT = async (req, res, next) => {
         }
         next();
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "verifyJWT"));
     }
 }
 

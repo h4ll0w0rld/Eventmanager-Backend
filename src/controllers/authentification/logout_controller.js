@@ -1,5 +1,5 @@
 const db = require('../../models');
-
+const handleError = require('../../services/error_service').handleErrors;
 const User = db.user;
 
 const handleLogout = async (req, res, next) => {
@@ -24,10 +24,7 @@ const handleLogout = async (req, res, next) => {
         res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
         res.status(204).send({ message: "successful logout" })
     } catch (error) {
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "logoutController"));
     }
 }
 

@@ -1,5 +1,6 @@
 const { urlencoded } = require("body-parser");
 const db = require("../models");
+const handleError = require("../services/error_service").handleErrors;
 const UserEvent = db.userEvent;
 const ShiftCategoryEditor = db.shiftCategoryEditor;
 const ShiftCategory = db.shift_category;
@@ -35,11 +36,7 @@ const checkRole = async (req, res, next) => {
         req.roles = roles;
         next();
     } catch (error) {
-        console.log(error);
-        if (!error.statusCode) {
-            error.statusCode = 500;
-        }
-        next(error);
+        next(handleError(error, "checkRoleMiddleware"));
     }
 }
 
