@@ -51,7 +51,7 @@ const handleLogin = async (req, res, next) => {
                 refreshToken: refreshToken
             }, { where: { id: user.id } });
             res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000 });
-            res.status(200).send({ message: "successful login", accessToken: accessToken })
+            res.status(200).send({ message: "successful login", accessToken: accessToken, user: user })
         }
     } catch (error) {
         next(handleError(error, "authController"));
