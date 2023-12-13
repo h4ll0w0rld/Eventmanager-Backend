@@ -21,7 +21,7 @@ const handleLogout = async (req, res, next) => {
             refreshToken: null
         }, { where: { id: user.id } });
         // delete refreshToken from Cookie
-        res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+        res.clearCookie('jwt', { httpOnly: true, secure: true });
         res.status(204).send({ message: "successful logout" })
     } catch (error) {
         next(handleError(error, "logoutController"));
