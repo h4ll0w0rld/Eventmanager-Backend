@@ -2,7 +2,7 @@ const db = require('../../models');
 const bcrypt = require('bcrypt');
 const handleError = require('../../services/error_service').handleErrors;
 const validationService = require('../../services/validation_service');
-const authService = require('../../services/auth_service');
+const authService = require('../../services/authValidation_service');
 
 
 
