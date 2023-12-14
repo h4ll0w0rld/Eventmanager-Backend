@@ -1,12 +1,9 @@
 module.exports = {
-    // HOST: 'localhost',
-    // USER: 'root',
-    // PASSWORD: 'dev',
-    // DB: 'ventIT',
     HOST: '127.0.0.1',
-    USER: 'eventuser',
-    PASSWORD: 'Event123SQL1',
-    DB: 'Planit',
+    USER: 'root',
+    PASSWORD: 'J0174th4171998',
+    DB: 'testDB',
+    // DB: 'eventappdb',
     PORT: 3306,
     DIALECT: 'mysql',
     TIMEZONE: '+00:00'
