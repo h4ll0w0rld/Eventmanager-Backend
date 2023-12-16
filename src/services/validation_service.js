@@ -173,9 +173,9 @@ const isActivityInEvent = async (activity_id, shift_category_id, event_id) => {
         )
         if (!activity) {
             throw Object.assign(new Error("Activity not found"), { statusCode: 400 });
-        } if (!activity.shift_category) {
-            throw Object.assign(new Error("Activity is not the specified Shift Category"), { statusCode: 400 });
-        } if (!activity.shift_category.event) {
+        } if (!activity.shift.shift_category) {
+            throw Object.assign(new Error("Activity is not in the specified Shift Category"), { statusCode: 400 });
+        } if (!activity.shift.shift_category.event) {
             throw Object.assign(new Error("Activity is not in Event"), { statusCode: 400 });
         }
         return activity;
