@@ -19,20 +19,14 @@ const checkRole = async (req, res, next) => {
             user: false,
             editor: []
         }
-
         roles.admin = userEvent.admin;
         roles.user = userEvent.user;
         roles.guest = userEvent.guest;
 
-        const shiftCategoryEditors = await ShiftCategoryEditor.findAll(
-            {
-                where: { userId: req.currentUserId },
-            });
-
+        const shiftCategoryEditors = await db.shiftCategoryEditor.findAll({ where: { userEventId: userEvent.id } });
         shiftCategoryEditors.forEach(shiftCategoryEditor => {
-            roles.editor.push(shiftCategoryEditor.shiftCategory);
+            roles.editor.push(shiftCategoryEditor.dataValues.ShiftCategoryId);
         });
-
         req.roles = roles;
         next();
     } catch (error) {

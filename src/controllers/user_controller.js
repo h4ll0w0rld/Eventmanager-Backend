@@ -65,13 +65,16 @@ const addUser = async (req, res, next) => {
         db.sequelize.transaction(async (t) => {
             user = await User.create(info, { transaction: t })
             await user.addEvent(event_id, { transaction: t });
+        }).then(() => {
+            res.status(201).send({ message: "successful created new User", data: user })
+        }).catch((error) => {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                error.message = "Email address already exists";
+                error.statusCode = 409;
+            }
+            next(handleError(error, "userController"));
         })
-        res.status(201).send({ message: "successful created new User", data: user })
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
-            error.message = "Email address already exists";
-            error.statusCode = 409;
-        }
         next(handleError(error, "userController"));
     }
 }

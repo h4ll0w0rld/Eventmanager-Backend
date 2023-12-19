@@ -38,6 +38,12 @@ db.status = require('./sequelize_models/status.js')(sequelize, DataTypes);
 db.activity = require('./sequelize_models/activity.js')(sequelize, DataTypes);
 
 db.userEvent = sequelize.define('user_event', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+    },
     admin: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
@@ -57,8 +63,8 @@ db.user.belongsToMany(db.event, { through: db.userEvent, onDelete: 'cascade' });
 
 
 db.shiftCategoryEditor = sequelize.define('shift_category_editor')
-db.user.belongsToMany(db.shift_category, { through: db.shiftCategoryEditor, onDelete: 'cascade' });
-db.shift_category.belongsToMany(db.user, { through: db.shiftCategoryEditor, onDelete: 'cascade' });
+db.userEvent.belongsToMany(db.shift_category, { through: db.shiftCategoryEditor, onDelete: 'cascade' });
+db.shift_category.belongsToMany(db.userEvent, { through: db.shiftCategoryEditor, onDelete: 'cascade' });
 
 
 

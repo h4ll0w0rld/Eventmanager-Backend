@@ -91,6 +91,10 @@ const addUserToEvent = async (req, res, next) => {
                 error.statusCode = 500;
             }
         } finally {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                error.message = "User already added to Event";
+                error.statusCode = 400;
+            }
             next(handleError(error, "eventController"));
         }
     }
@@ -130,8 +134,11 @@ const removeUserFromEvent = async (req, res, next) => {
             })
 
             await UserEvent.destroy({ where: { UserId: user.id, EventId: event.id }, transaction: t });
+        }).then(() => {
+            res.status(204).send({ message: "successful removed User from Event" })
+        }).catch((error) => {
+            next(handleError(error, "eventController"));
         })
-        res.status(204).send({ message: "successful removed User from Event" })
     } catch (error) {
         next(handleError(error, "eventController"));
     }
