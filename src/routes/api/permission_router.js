@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.put('/:current_event_id/makeEditor/shift_category_id/:shift_category_id/user_id/:user_id', checkRole, permissionMiddleware.checkAdmin, permissionController.makeEditor);
 router.put('/:current_event_id/makeAdmin/user_id/:user_id', checkRole, permissionMiddleware.checkAdmin, permissionController.makeAdmin);
-
+router.get('/:current_event_id/getRoles', checkRole, permissionMiddleware.checkGuest, permissionController.getRoles)
 
 
 module.exports = router;

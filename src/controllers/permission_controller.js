@@ -34,8 +34,24 @@ const makeAdmin = async (req, res, next) => {
 }
 
 
+const getRoles = async (req, res, next) => {
+    try {
+        const roles = req.roles;
+        if (!roles) {
+            const error = new Error("No roles found");
+            error.statusCode = 403;
+            throw error;
+        }
+        res.status(200).send(roles)
+    } catch (error) {
+        next(handleError(error, "permissionController"));
+    }
+}
+
+
 
 module.exports = {
     makeEditor,
-    makeAdmin
+    makeAdmin,
+    getRoles
 }
