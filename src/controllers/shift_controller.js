@@ -92,37 +92,76 @@ const getShiftById = async (req, res, next) => {
 const getShiftsByUserAndEvent = async (req, res, next) => {
     let user_id = req.params.user_id;
     let event_id = req.params.current_event_id;
+    let status = req.params.status;
     try {
         await validationService.isUserinEvent(user_id, event_id)
-        let shifts = await Shift.findAll(
-            {
-                include: [
-                    {
-                        model: Activity,
-                        as: "activities",
-                        include: [
-                            {
-                                model: User,
-                                as: "user"
-                            }
-                        ]
-                    },
+        if (status === "all") {
+            let shifts = await Shift.findAll(
+                {
+                    include: [
+                        {
+                            model: Activity,
+                            as: "activities",
+                            include: [
+                                {
+                                    model: User,
+                                    as: "user",
+                                    attributes: ['id', 'firstName', 'lastName']
+                                }
+                            ]
+                        },
 
-                    {
-                        model: ShiftCategory,
-                        as: "shift_category"
-                    }
-                ],
-                where: {
-                    '$shift_category.event_id$': event_id,
-                    '$activities.user_id$': user_id
-                },
-                order: [
-                    ['startTime', 'ASC']
-                ]
-            });
-        res.status(200).send(shifts);
+                        {
+                            model: ShiftCategory,
+                            as: "shift_category"
+                        }
+                    ],
+                    where: {
+                        '$shift_category.event_id$': event_id,
+                        '$activities.user_id$': user_id
+                    },
+                    order: [
+                        ['activities', 'status', 'DESC'],
+                        ['startTime', 'ASC']
+                    ],
+                });
+            res.status(200).send(shifts);
+        } else if (status === "requested" || status === "confirmed") {
+            let shifts = await Shift.findAll(
+                {
+                    include: [
+                        {
+                            model: Activity,
+                            as: "activities",
+                            include: [
+                                {
+                                    model: User,
+                                    as: "user",
+                                    attributes: ['id', 'firstName', 'lastName']
+                                }
+                            ]
+                        },
+
+                        {
+                            model: ShiftCategory,
+                            as: "shift_category"
+                        }
+                    ],
+                    where: {
+                        '$shift_category.event_id$': event_id,
+                        '$activities.user_id$': user_id,
+                        '$activities.status$': status
+                    },
+                    order: [
+                        ['startTime', 'ASC']
+                    ]
+                });
+            res.status(200).send(shifts);
+        } else {
+            throw Object.assign(new Error('Status must be requested, confirmed or all!'), { statusCode: 400 });
+        }
     } catch (error) {
+        console.log(error);
         next(handleError(error, "shiftController"));
     }
 }

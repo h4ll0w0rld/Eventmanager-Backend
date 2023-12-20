@@ -46,7 +46,7 @@ const checkUser = (req, res, next) => {
 
 const checkEditor = (req, res, next) => {
     try {
-        if (req.roles.editor.includes(req.params.shift_category_id) || req.roles.admin) {
+        if (req.roles.editor.includes(parseInt(req.params.shift_category_id)) || req.roles.admin) {
             next();
         } else {
             const error = new Error("Unauthorized: Editor privileges required");
@@ -74,7 +74,7 @@ const checkCurrentUser = (req, res, next) => {
 
 const checkCurrentUserOrEditor = (req, res, next) => {
     try {
-        if (req.currentUserId == req.params.user_id || req.roles.editor.includes(req.params.shift_category_id) || req.roles.admin) {
+        if (req.currentUserId == req.params.user_id || req.roles.editor.includes(parseInt(req.params.shift_category_id)) || req.roles.admin) {
             next();
         } else {
             const error = new Error("Unauthorized: Only the User or Editor can access this route");

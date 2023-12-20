@@ -108,7 +108,7 @@ const removeUserFromEvent = async (req, res, next) => {
         const user = await validationService.isUserIDValid(userId);
         db.sequelize.transaction(async (t) => {
             //remove the user from all activities of the event
-            Activity.findAll({
+            const activities = await Activity.findAll({
                 include: [
                     {
                         model: Shift,
@@ -127,12 +127,11 @@ const removeUserFromEvent = async (req, res, next) => {
 
                 },
                 transaction: t
-            }).then(activities => {
-                activities.forEach(activity => {
-                    activity.update({ user_id: null }, { transaction: t })
-                })
-            })
+            });
 
+            await activities.forEach(activity => {
+                activity.update({ user_id: null, status: "free" }, { transaction: t })
+            });
             await UserEvent.destroy({ where: { UserId: user.id, EventId: event.id }, transaction: t });
         }).then(() => {
             res.status(204).send({ message: "successful removed User from Event" })

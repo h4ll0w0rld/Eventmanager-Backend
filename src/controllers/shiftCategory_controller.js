@@ -1,5 +1,3 @@
-const moment = require('moment-timezone');
-
 const db = require("../models");
 const validationService = require("../services/validation_service");
 const handleError = require("../services/error_service").handleErrors;

@@ -6,6 +6,11 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
+        status: {
+            type: DataTypes.ENUM('free', 'requested', 'confirmed'),
+            allowNull: false,
+            defaultValue: 'free'
+        },
         description: {
             type: DataTypes.STRING,
             allowNull: true

@@ -34,7 +34,6 @@ db.event = require('./sequelize_models/event.js')(sequelize, DataTypes);
 db.user = require('./sequelize_models/user.js')(sequelize, DataTypes);
 db.shift_category = require('./sequelize_models/shift_category.js')(sequelize, DataTypes);
 db.shift = require('./sequelize_models/shift.js')(sequelize, DataTypes);
-db.status = require('./sequelize_models/status.js')(sequelize, DataTypes);
 db.activity = require('./sequelize_models/activity.js')(sequelize, DataTypes);
 
 db.userEvent = sequelize.define('user_event', {
@@ -151,24 +150,6 @@ db.activity.belongsTo(db.user, {
     },
     as: 'user'
 });
-
-
-// db.status.hasMany(db.activity, {
-//     onDelete: 'restrict',
-//     foreignKey: {
-//         name: 'status_id',
-//         allowNull: false
-//     },
-//     as: 'activities'
-// });
-
-// db.activity.belongsTo(db.status, {
-//     foreignKey: {
-//         name: 'status_id',
-//         allowNull: false
-//     },
-//     as: 'status'
-// });
 
 
 module.exports = db;
