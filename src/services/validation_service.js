@@ -59,6 +59,49 @@ const isUserAvailable = async (user_id, activity_id) => {
 }
 
 
+const areAdminsLeft = async (event_id) => {
+    try {
+        const userEvents = await UserEvent.findAll({
+            where: {
+                EventId: event_id,
+                admin: true
+            }
+        });
+        if (userEvents.length === 1) {
+            throw Object.assign(new Error("Last Admin can not be removed!"), { statusCode: 400 });
+        }
+        return true;
+    } catch (err) {
+        throw handleError(err, "validationService");
+    }
+}
+
+const isDeleteUserValid = async (user_id) => {
+    try {
+        const userEvent = await UserEvent.findAll({
+            where: {
+                UserId: user_id,
+                admin: true
+            }
+        });
+        if (userEvent.length > 0) {
+            for (const event of userEvent) {
+                try {
+                    await areAdminsLeft(event.EventId);
+                } catch (err) {
+                    throw Object.assign(new Error("You are the only Admin in the Event with the ID: " + event.EventId + " Please delete the Event or make another User to Admin before you are able to remove your account"), { statusCode: 400 });
+                }
+            }
+            return true;
+        } else {
+            return true;
+        }
+    } catch (err) {
+        throw handleError(err, "validationService");
+    }
+}
+
+
 /*****
  * 
  * GET Param checks
@@ -85,8 +128,7 @@ const isShiftCategoryInEvent = async (shift_category_id, event_id) => {
             }
         )
         if (!shift_category) {
-            throw Object.assign(new Error("Shift Category not found"), { statusCode: 400 });
-        } if (!shift_category.event) {
+            await isShiftCategoryIDValid(shift_category_id);
             throw Object.assign(new Error("Shift Category is not in Event"), { statusCode: 400 });
         }
         return shift_category;
@@ -123,6 +165,7 @@ const isShiftInEvent = async (shift_id, shift_category_id, event_id) => {
                 }
             }
         )
+        //TODO: if routes currently unreachable
         if (!shift) {
             throw Object.assign(new Error("Shift not found"), { statusCode: 400 });
         } if (!shift.shift_category) {
@@ -173,10 +216,9 @@ const isActivityInEvent = async (activity_id, shift_category_id, event_id) => {
         )
         if (!activity) {
             throw Object.assign(new Error("Activity not found"), { statusCode: 400 });
-        } if (!activity.shift.shift_category) {
+        } if (!activity.shift) {
+            await isShiftCategoryInEvent(shift_category_id, event_id);
             throw Object.assign(new Error("Activity is not in the specified Shift Category"), { statusCode: 400 });
-        } if (!activity.shift.shift_category.event) {
-            throw Object.assign(new Error("Activity is not in Event"), { statusCode: 400 });
         }
         return activity;
     }
@@ -464,6 +506,8 @@ const isTimeValid = (time) => {
 
 module.exports = {
     isUserAvailable,
+    areAdminsLeft,
+    isDeleteUserValid,
     isShiftCategoryInEvent,
     isShiftInEvent,
     isActivityInEvent,

@@ -41,6 +41,7 @@ const deleteUserById = async (req, res, next) => {
     let user_id = req.params.user_id;
     try {
         await validationService.isUserIDValid(user_id);
+        await validationService.isDeleteUserValid(user_id);
         let user = await User.destroy({ where: { id: user_id } })
         res.status(204).send({ message: "successful deleted User" })
     } catch (error) {
@@ -95,9 +96,12 @@ const claimUser = async (req, res, next) => {
         if (user.firstName !== firstName || user.lastName !== lastName) {
             throw Object.assign(new Error('Name does not match!'), { statusCode: 400 });
         }
+
         await db.sequelize.transaction(async (t) => {
-            await UserEvent.create({ UserId: currentUserId, EventId: event_id, user: true }, { transaction: t });
-            await Activity.update({ UserId: currentUserId }, { where: { UserId: user_id } }, { transaction: t });
+            if (!await UserEvent.findOne({ where: { UserId: currentUserId, EventId: event_id } })) {
+                await UserEvent.create({ UserId: currentUserId, EventId: event_id, user: true }, { transaction: t });
+            }
+            await Activity.update({ user_id: currentUserId }, { where: { user_id: user_id } }, { transaction: t });
             await UserEvent.destroy({ where: { UserId: user_id, EventId: event_id } }, { transaction: t });
             await User.destroy({ where: { id: user_id } }, { transaction: t });
         })

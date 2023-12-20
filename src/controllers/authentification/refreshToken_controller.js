@@ -39,7 +39,7 @@ const handleRefreshToken = async (req, res, next) => {
                     },
                     process.env.ACCESS_TOKEN_SECRET,
                     {
-                        expiresIn: '5m'
+                        expiresIn: '1d'
                     }
                 );
                 res.status(200).send({ message: "successful refresh", accessToken: accessToken })

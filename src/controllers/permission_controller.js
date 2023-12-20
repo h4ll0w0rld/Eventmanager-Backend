@@ -20,6 +20,19 @@ const makeEditor = async (req, res, next) => {
     }
 }
 
+const removeEditor = async (req, res, next) => {
+    let user_id = req.params.user_id;
+    let event_id = req.params.current_event_id;
+    let shift_category_id = req.params.shift_category_id;
+    try {
+        const userEvent = await validationService.isUserinEvent(user_id, event_id);
+        const editor = await ShiftCategoryEditor.destroy({ where: { userEventId: userEvent.id, ShiftCategoryId: shift_category_id } });
+        res.status(201).send({ message: "successful removed Editor rights", data: editor })
+    } catch (error) {
+        next(handleError(error, "permissionController"));
+    }
+}
+
 // TODO fix
 const makeAdmin = async (req, res, next) => {
     let user_id = req.params.user_id;
@@ -28,6 +41,19 @@ const makeAdmin = async (req, res, next) => {
         const userEvent = await validationService.isUserinEvent(user_id, event_id);
         await userEvent.update({ admin: true });
         res.status(201).send({ message: "successful created new Admin" })
+    } catch (error) {
+        next(handleError(error, "permissionController"));
+    }
+}
+
+const removeAdmin = async (req, res, next) => {
+    let user_id = req.params.user_id;
+    let event_id = req.params.current_event_id;
+    try {
+        const userEvent = await validationService.isUserinEvent(user_id, event_id);
+        await validationService.areAdminsLeft(event_id);
+        await userEvent.update({ admin: false });
+        res.status(201).send({ message: "successful removed Admin rights" })
     } catch (error) {
         next(handleError(error, "permissionController"));
     }
@@ -52,6 +78,8 @@ const getRoles = async (req, res, next) => {
 
 module.exports = {
     makeEditor,
+    removeEditor,
     makeAdmin,
+    removeAdmin,
     getRoles
 }
