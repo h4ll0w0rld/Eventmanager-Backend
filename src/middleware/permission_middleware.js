@@ -17,7 +17,7 @@ const checkAdmin = (req, res, next) => {
 
 const checkGuest = (req, res, next) => {
     try {
-        if (req.roles.guest) {
+        if (req.roles.guest || req.roles.admin || req.roles.user) {
             next();
         } else {
             const error = new Error("Unauthorized: Guest privileges required");
@@ -31,7 +31,7 @@ const checkGuest = (req, res, next) => {
 
 const checkUser = (req, res, next) => {
     try {
-        if (req.roles.user) {
+        if (req.roles.user || req.roles.admin) {
             next();
         } else {
             const error = new Error("Unauthorized: User privileges required");
