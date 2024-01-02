@@ -89,10 +89,10 @@ const claimUser = async (req, res, next) => {
     let lastName = req.params.lastName;
     try {
         const userEvent = await validationService.isUserinEvent(user_id, event_id);
-        if (userEvent.user) {
+        const user = await validationService.isUserIDValid(user_id);
+        if (user.emailAddress) {
             throw Object.assign(new Error('User already claimed!'), { statusCode: 400 });
         }
-        const user = await validationService.isUserIDValid(user_id);
         if (user.firstName !== firstName || user.lastName !== lastName) {
             throw Object.assign(new Error('Name does not match!'), { statusCode: 400 });
         }
