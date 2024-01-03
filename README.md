@@ -26,11 +26,19 @@ generate a Token for the ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET
 
 
 3. Create a Certficate for the https connection
+# DEV
 ```shell
 openssl req -nodes -new -x509 -keyout server.key -out server.crt
 ```
-
 move the server.key and server.crt to the ./certificate folder
+
+# PROD
+```shell
+sudo certbot certonly --standalone -d deine_domain.de -d www.deine_domain.de
+```
+
+exchange the path in the server.js file to the new certificate
+
 
 ## Start the App
 Type the following command to run nodemon and the ExpressServer
