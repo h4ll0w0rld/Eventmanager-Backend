@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const db = require("./src/models");
 const cors = require('cors');
+const fs = require('fs');
+const https = require('https');
 
 const corsOptions = require('./config/corsOptions').corsOptions;
 const credentials = require('./src/middleware/credentials_middleware').credentials;
@@ -25,6 +27,10 @@ const errorHandling = require('./src/middleware/error_middleware');
 // initialize express
 const app = express();
 const PORT = 3000;
+const options = {
+    key: fs.readFileSync('./certificate/server.key'),
+    cert: fs.readFileSync('./certificate/server.crt')
+};
 
 
 //bodyparser setup
@@ -101,11 +107,14 @@ process.once('SIGINT', shutdown);
 process.once('SIGTERM', shutdown);
 
 
+
+const server = https.createServer(options, app);
+
 //default request
 app.get('/', (req, res) => {
     res.send(`Your Server is running and ready for requests on port ${PORT}`)
 })
 
 
-app.listen(PORT, () => console.log(`Your server is listening on port ${PORT}!`))
+server.listen(PORT, () => console.log(`Your server is listening on port ${PORT}!`))
 
