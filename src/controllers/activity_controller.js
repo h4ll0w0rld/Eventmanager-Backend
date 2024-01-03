@@ -121,7 +121,7 @@ const confirmUserToActivity = async (req, res, next) => {
             // if activity already has an user
             throw Object.assign(new Error('Activity already has an requested or confirmed user!'), { statusCode: 400 });
         } else {
-            await validationService.isUserAvailable(user_id, activity_id);
+            // await validationService.isUserAvailable(user_id, activity_id);
             await activity.update({ user_id: user_id, status: "confirmed" });
             res.status(204).send({ message: "successful confirmed User to Activity" })
         }
