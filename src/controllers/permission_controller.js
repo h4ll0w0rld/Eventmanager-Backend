@@ -63,6 +63,7 @@ const removeAdmin = async (req, res, next) => {
 const getRoles = async (req, res, next) => {
     try {
         const roles = req.roles;
+        
         if (!roles) {
             const error = new Error("No roles found");
             error.statusCode = 403;
