@@ -88,7 +88,6 @@ const getAvailableUsers = async (req, res, next) => {
                     ]
                 }
             );
-
             // filter all users by unavailable users
             const availableUsers = allUsers.filter(user => !unavailableUsers.some(unavailableUser => unavailableUser.id === user.id));
             res.status(200).send(availableUsers);
@@ -118,7 +117,7 @@ const confirmUserToActivity = async (req, res, next) => {
         if (!userEvent) {
             throw Object.assign(new Error('User is not in the same Event!'), { statusCode: 400 });
         }
-        if (activity.status === "confirmed" || activity.status === "requested") {
+        if (activity.status === "confirmed") {
             // if activity already has an user
             throw Object.assign(new Error('Activity already has an requested or confirmed user!'), { statusCode: 400 });
         } else {
