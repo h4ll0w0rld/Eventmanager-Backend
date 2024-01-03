@@ -2,9 +2,8 @@
 config/dbConfig.js
 TODO.md
 .env
-certificate/server.crt
 certificate/server.key
-
+certificate/server.crt
 
 ######################################
 # macOS

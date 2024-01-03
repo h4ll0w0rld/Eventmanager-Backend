@@ -24,6 +24,14 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 
 generate a Token for the ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET
 
+
+3. Create a Certficate for the https connection
+```shell
+openssl req -nodes -new -x509 -keyout server.key -out server.crt
+```
+
+move the server.key and server.crt to the ./certificate folder
+
 ## Start the App
 Type the following command to run nodemon and the ExpressServer
 ```shell
