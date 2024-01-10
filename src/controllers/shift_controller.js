@@ -61,28 +61,21 @@ const getShiftById = async (req, res, next) => {
 }
 
 
-//PUT set Shift to active
-// const setisActive = async (req, res, next) => {
-//     let shift_id = req.params.shift_id;
-//     let isActive = req.params.isActive;
-//     try {
-//         await validationService.isShiftIDValid(shift_id);
-//         if (typeof isActive === "boolean") {
-//             throw Object.assign(new Error('isActive must be a boolean!'), { statusCode: 400 });
-//         }
-//         await Shift.update(
-//             { isActive: isActive },
-//             { where: { id: shift_id } }
-//         )
-//         res.status(204).send({ message: "Shift set to active" });
-//     } catch (error) {
-//         if (!error.statusCode) {
-//             error.statusCode = 500;
-//         }
-//         next(error);
-//     }
-// }
 
+//DELETE Shift by ID
+
+const deleteShiftById = async (req, res, next) => {
+    let shift_id = req.params.shift_id;
+    let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
+    try {
+        await validationService.isShiftInEvent(shift_id, shift_category_id, event_id);
+        await Shift.destroy({ where: { id: shift_id } });
+        res.status(200).send({ message: "Shift was deleted successfully!" });
+    } catch (error) {
+        next(handleError(error, "shiftController"));
+    }
+}
 
 
 
@@ -214,7 +207,7 @@ const getShiftArray = (shiftBlocks) => {
 module.exports = {
     getAllShifts: getAllShifts,
     getShiftById: getShiftById,
-    // setisActive: setisActive,
+    deleteShiftById: deleteShiftById,
     getShiftsByUserAndEvent: getShiftsByUserAndEvent,
     getShiftArray: getShiftArray
 }
