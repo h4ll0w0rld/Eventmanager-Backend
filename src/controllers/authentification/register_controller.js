@@ -23,12 +23,13 @@ const registerNewUser = async (req, res, next) => {
         //encrypt password
         const hashedPassword = await bcrypt.hash(info.password, 10);
         //create user in database
-        const user = await User.create({
+        let user = await User.create({
             firstName: info.firstName,
             lastName: info.lastName,
             emailAddress: info.emailAddress,
             password: hashedPassword
         });
+        user.password = undefined;
         res.status(201).send({ message: "successful created new User", data: user })
     } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
