@@ -21,7 +21,7 @@ const addActivity = async (req, res, next) => {
     }
     try {
         await validationService.isShiftInEvent(info.shift_id, info.shift_category_id, info.event_id);
-        const activity = await Activity.create(info.shift_id)
+        const activity = await Activity.create({ shift_id: info.shift_id })
         res.status(201).send({ message: "successful created new Activity", data: activity })
     } catch (error) {
         next(handleError(error, "activityController"));
