@@ -19,7 +19,7 @@ const handleLogin = async (req, res, next) => {
     }
     try {
         //validate input and get user
-        const user = await authService.isLoginValid(info);
+        let user = await authService.isLoginValid(info);
         //compare password
         const isPasswordValid = await bcrypt.compare(info.password, user.password);
         if (!isPasswordValid) {
@@ -50,6 +50,7 @@ const handleLogin = async (req, res, next) => {
             await User.update({
                 refreshToken: refreshToken
             }, { where: { id: user.id } });
+            user.password = undefined;
             res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });    //Removen: , sameSite: 'None' 
             res.status(200).send({ message: "successful login", accessToken: accessToken, user: user })
         }
