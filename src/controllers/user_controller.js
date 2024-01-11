@@ -14,6 +14,8 @@ const getUserById = async (req, res, next) => {
     try {
         await validationService.isUserinEvent(id, event_id);
         let user = await validationService.isUserIDValid(id);
+        user.password = undefined;
+        user.refreshToken = undefined;
         res.status(200).send(user)
     } catch (error) {
         next(handleError(error, "userController"));
