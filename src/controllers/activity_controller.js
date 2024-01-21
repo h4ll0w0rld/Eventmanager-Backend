@@ -114,6 +114,7 @@ const confirmUserToActivity = async (req, res, next) => {
                 EventId: activity.shift.shift_category.event_id
             }
         });
+        await validationService.isUserAvailable(user_id, activity_id);
         if (!userEvent) {
             throw Object.assign(new Error('User is not in the same Event!'), { statusCode: 400 });
         }
@@ -146,6 +147,7 @@ const requestUserToActivity = async (req, res, next) => {
                 EventId: activity.shift.shift_category.event_id
             }
         });
+        await validationService.isUserAvailable(user_id, activity_id);
         if (!userEvent) {
             throw Object.assign(new Error('User is not in the same Event!'), { statusCode: 400 });
         }

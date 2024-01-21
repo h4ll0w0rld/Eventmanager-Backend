@@ -115,6 +115,6 @@ app.get('/', (req, res) => {
     res.send(`Your Server is running and ready for requests on port ${PORT}`)
 })
 
-
-server.listen(PORT, () => console.log(`Your server is listening on port ${PORT}!`))
+//change to server.listen for https
+app.listen(PORT, () => console.log(`Your server is listening on port ${PORT}!`))
 
