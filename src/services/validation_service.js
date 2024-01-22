@@ -49,7 +49,11 @@ const isUserAvailable = async (user_id, activity_id) => {
             ],
         })
         if (conflictingActivities.length > 0) {
-            throw Object.assign(new Error("User is not available!"), { statusCode: 400 });
+            if (conflictingActivities[0].id !== activity_id) {
+                throw Object.assign(new Error("User is not available!"), { statusCode: 400 });
+            } else {
+                return true;
+            }
         } else {
             return true;
         }
