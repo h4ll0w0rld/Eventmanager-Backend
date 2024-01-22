@@ -10,6 +10,6 @@ module.exports = {
     // DB: 'Planit',
     PORT: 3306,
     DIALECT: 'mysql',
-    TIMEZONE: 'UTC',
+    TIMEZONE: '+0:00',
     OverwriteOnSync: false,
 };
