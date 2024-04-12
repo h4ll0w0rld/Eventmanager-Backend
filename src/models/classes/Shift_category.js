@@ -1,4 +1,3 @@
-import { shift } from '..';
 
 const moment = require('moment');
 
