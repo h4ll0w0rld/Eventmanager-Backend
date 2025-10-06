@@ -13,6 +13,7 @@ const User = db.user;
 
 
 const handleLogin = async (req, res, next) => {
+    console.log("Das kommt an: ", req.body.emailAddress)
     let info = {
         emailAddress: req.body.emailAddress,
         password: req.body.password
@@ -51,7 +52,7 @@ const handleLogin = async (req, res, next) => {
                 refreshToken: refreshToken
             }, { where: { id: user.id } });
             user.password = undefined;
-            res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });    //Removen: , sameSite: 'None' 
+            res.cookie('jwt', accessToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });    //Removen: , sameSite: 'None' 
             res.status(200).send({ message: "successful login", accessToken: accessToken, user: user })
         }
     } catch (error) {

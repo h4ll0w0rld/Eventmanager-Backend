@@ -13,6 +13,7 @@ const verifyJWT = async (req, res, next) => {
             throw error;
         }
         const token = authHeader.split(' ')[1];
+        console.log(token, "bbb")
         jwt.verify(
             token,
             process.env.ACCESS_TOKEN_SECRET,

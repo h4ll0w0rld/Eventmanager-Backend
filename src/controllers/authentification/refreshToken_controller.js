@@ -10,16 +10,27 @@ const User = db.user;
 
 const handleRefreshToken = async (req, res, next) => {
     const cookies = req.cookies;
+    const authHeader = req.headers['authorization'];
+    console.log("Haha", cookies.jwt)
+   
     try {
-        if (!cookies?.jwt) {
-            const error = new Error("Unauthorized");
+        if (!authHeader) {
+            const error = new Error('Authentification required');
+            console.log("AUTH REQ")
             error.statusCode = 401;
             throw error;
         }
-        const refreshToken = cookies.jwt;
+        const token = authHeader.split(' ')[1];
+        // if (!cookies?.jwt) {
+        //     const error = new Error("Unauthorized");
+        //     error.statusCode = 401;
+        //     throw error;
+        // }
+        const refreshToken = token;
         const user = await User.findOne({ where: { refreshToken: refreshToken } });
         if (!user) {
             const error = new Error("refresh Token does not exist");
+            console.log("refresh Token does not exist")
             error.statusCode = 401;
             throw error;
         }
@@ -30,9 +41,11 @@ const handleRefreshToken = async (req, res, next) => {
             (err, decoded) => {
                 if (err || user.id !== decoded.id) {
                     const error = new Error('refresh Token is not valid');
+                    console.log("refresh Token is not valid")
                     error.statusCode = 401;
                     throw error;
                 }
+                console.log("alles jütz")
                 const accessToken = jwt.sign(
                     {
                         id: decoded.id,
@@ -42,7 +55,8 @@ const handleRefreshToken = async (req, res, next) => {
                         expiresIn: '5m'
                     }
                 );
-                res.status(200).send({ message: "successful refresh", accessToken: accessToken })
+                res.cookie('jwt', accessToken, { httpOnly: true, secure: true, maxAge:  60 * 1000 }); 
+                //res.status(200).send({ message: "successful refresh", accessToken: accessToken })
             }
         )
     } catch (error) {

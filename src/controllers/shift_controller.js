@@ -83,6 +83,7 @@ const deleteShiftById = async (req, res, next) => {
 // GET all Shifts by User
 
 const getShiftsByUserAndEvent = async (req, res, next) => {
+   console.log("FIRE")
     let user_id = req.params.user_id;
     let event_id = req.params.current_event_id;
     let status = req.params.status;
@@ -149,8 +150,10 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
                         ['startTime', 'ASC']
                     ]
                 });
+                console.log("Shifts of: ", user_id, "Found", shifts)
             res.status(200).send(shifts);
         } else {
+            console.log("PROBLEMO")
             throw Object.assign(new Error('Status must be requested, confirmed or all!'), { statusCode: 400 });
         }
     } catch (error) {
