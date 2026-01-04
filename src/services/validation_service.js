@@ -18,6 +18,8 @@ const UserEvent = db.userEvent;
 // checks if the user is available for the activity
 const isUserAvailable = async (user_id, activity_id) => {
     try {
+        console.log("---------------------------------");
+        console.log("Validating user availability...", user_id, activity_id);
         const activity = await Activity.findOne({
             where: {
                 id: activity_id
@@ -29,11 +31,13 @@ const isUserAvailable = async (user_id, activity_id) => {
                 }
             ]
         })
+        console.log("Found activity with shift:", activity.shift.endTime);
         const conflictingActivities = await Activity.findAll({
             include: [
                 {
                     model: Shift,
                     as: "shift",
+                    required: true,
                     where: {
                         startTime: { [sequelize.Op.lt]: activity.shift.endTime },
                         endTime: { [sequelize.Op.gt]: activity.shift.startTime }
@@ -48,9 +52,12 @@ const isUserAvailable = async (user_id, activity_id) => {
                 }
             ],
         })
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        console.log("Conflicting activities found:", conflictingActivities.length);
         if (conflictingActivities.length > 0) {
-       
+
             if (conflictingActivities[0].id != activity_id) {
+                console.log("User is not available!");
                 throw Object.assign(new Error("User is not available!"), { statusCode: 400 });
             } else {
                 return true;
@@ -62,6 +69,8 @@ const isUserAvailable = async (user_id, activity_id) => {
         throw handleError(err, "validationService");
     }
 }
+
+
 
 
 const areAdminsLeft = async (event_id) => {

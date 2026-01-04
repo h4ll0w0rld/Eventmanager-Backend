@@ -1,4 +1,5 @@
 const handleErrors = (error, name) => {
+    console.error(`Error in ${name}:`, error.message);
     if (!error.statusCode) {
         error.statusCode = 500;
     }

@@ -13,6 +13,17 @@ const checkAdmin = (req, res, next) => {
         next(handleError(error, "permissionMiddleware"));
     }
 }
+const checkIsAdmin = (req, res, next) => {
+    try {
+        const isAdmin = req.roles.admin === true;
+        console.log("------------------------------------------------")
+        console.log(`User ID: ${req.params.user_id} Admin Status: ${isAdmin}`);
+        console.log("------------------------------------------------")
+        res.status(200).send({ isAdmin });
+    } catch (error) {
+        next(handleError(error, "checkIsAdmin"));
+    }
+};
 
 
 const checkGuest = (req, res, next) => {
@@ -109,5 +120,6 @@ module.exports = {
     checkEditor,
     checkCurrentUser,
     checkCurrentUserOrEditor,
-    checkCurrentUserOrAdmin
+    checkCurrentUserOrAdmin,
+    checkIsAdmin
 }

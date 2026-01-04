@@ -45,6 +45,34 @@ const makeAdmin = async (req, res, next) => {
         next(handleError(error, "permissionController"));
     }
 }
+const checkAdmin = async (req, res, next) => {
+  const user_id = req.params.user_id || req.body.user_id; // adjust depending on route
+  const event_id = req.params.current_event_id || req.body.event_id;
+
+  try {
+    // Check if the user is part of the event
+    const userEvent = await validationService.isUserinEvent(user_id, event_id);
+
+    if (!userEvent) {
+      const error = new Error("User not part of this event");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    // Check if admin
+    if (!userEvent.admin) {
+      const error = new Error("User is not an admin");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    // User is admin, continue
+    next();
+  } catch (error) {
+    next(handleError(error, "checkAdminMiddleware"));
+  }
+};
+
 
 const removeAdmin = async (req, res, next) => {
     let user_id = req.params.user_id;
@@ -82,5 +110,6 @@ module.exports = {
     removeEditor,
     makeAdmin,
     removeAdmin,
-    getRoles
+    getRoles,
+    checkAdmin
 }

@@ -1,6 +1,7 @@
 const db = require("../models");
 const handleError = require("../services/error_service").handleErrors;
 const validationService = require("../services/validation_service");
+const permission_controller = require("./permission_controller");
 
 // create main Model
 const Event = db.event;
@@ -18,12 +19,15 @@ const getAllUsersByEvent = async (req, res, next) => {
     let eventId = req.params.current_event_id;
     try {
         const event = await validationService.isEventIDValid(eventId);
+
         let users = await event.getUsers({
+
             attributes: {
                 exclude: ['password', 'refreshToken']
             },
-            order: [['lastName', 'ASC'], ['firstName', 'ASC']],
+            order: [['lastName', 'ASC'], ['firstName', 'ASC'], ['emailAddress', 'ASC']],
         });
+       
         res.status(200).send(users)
     } catch (error) {
         next(handleError(error, "eventController"));
