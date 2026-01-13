@@ -44,7 +44,8 @@ const getShiftById = async (req, res, next) => {
                         include: [
                             {
                                 model: User,
-                                as: "user"
+                                as: "user",
+                                attributes: { exclude: ["password"] }
                             }
                         ]
                     },
@@ -54,6 +55,7 @@ const getShiftById = async (req, res, next) => {
                     [{ model: Activity, as: "activities" }, "id", "DESC"]
                 ]
             });
+        console.log(shift, "FOUND SHIFT");
         res.status(200).send(shift);
     } catch (error) {
         next(handleError(error, "shiftController"));
@@ -83,7 +85,7 @@ const deleteShiftById = async (req, res, next) => {
 // GET all Shifts by User
 
 const getShiftsByUserAndEvent = async (req, res, next) => {
-   console.log("FIRE")
+    console.log("FIRE")
     let user_id = req.params.user_id;
     let event_id = req.params.current_event_id;
     let status = req.params.status;
@@ -150,7 +152,7 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
                         ['startTime', 'ASC']
                     ]
                 });
-                console.log("Shifts of: ", user_id, "Found", shifts)
+            console.log("Shifts of: ", user_id, "Found", shifts)
             res.status(200).send(shifts);
         } else {
             console.log("PROBLEMO")

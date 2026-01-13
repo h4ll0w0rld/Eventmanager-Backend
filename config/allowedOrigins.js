@@ -1,4 +1,4 @@
-const allowedOrigins = ['http://localhost:4200', 'http://planitevents.de'];
+const allowedOrigins = ['http://87.106.12.47:8080', 'http://planitevents.de'];
 
 module.exports = {
     allowedOrigins

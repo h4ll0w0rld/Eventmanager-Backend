@@ -45,6 +45,7 @@ const makeAdmin = async (req, res, next) => {
         next(handleError(error, "permissionController"));
     }
 }
+
 const checkAdmin = async (req, res, next) => {
   const user_id = req.params.user_id || req.body.user_id; // adjust depending on route
   const event_id = req.params.current_event_id || req.body.event_id;
@@ -72,6 +73,28 @@ const checkAdmin = async (req, res, next) => {
     next(handleError(error, "checkAdminMiddleware"));
   }
 };
+
+
+const isUserAdminInEvent = async (user_id, event_id) => {
+  try {
+    // Check if the user is part of the event
+    const userEvent = await UserEvent.findOne({ where: { userId:user_id, eventId: event_id } });
+    // roles.admin = 
+    console.log(userEvent.admin);
+    if (!userEvent) {
+      return false; // user not part of the event
+    }
+
+    // Return true if admin, false otherwise
+    return !!userEvent.admin;
+  } catch (error) {
+    console.error("Error checking admin status:", error);
+    return false;
+  }
+};
+
+module.exports = { isUserAdminInEvent };
+
 
 
 const removeAdmin = async (req, res, next) => {

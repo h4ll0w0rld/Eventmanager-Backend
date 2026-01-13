@@ -12,7 +12,7 @@ const Shift = db.shift;
 const UserEvent = db.userEvent;
 
 
-
+ 
 
 
 const getAllUsersByEvent = async (req, res, next) => {
@@ -27,6 +27,7 @@ const getAllUsersByEvent = async (req, res, next) => {
             },
             order: [['lastName', 'ASC'], ['firstName', 'ASC'], ['emailAddress', 'ASC']],
         });
+      
        
         res.status(200).send(users)
     } catch (error) {
