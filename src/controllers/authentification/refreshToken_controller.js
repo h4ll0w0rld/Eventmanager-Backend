@@ -53,7 +53,7 @@ const handleRefreshToken = async (req, res, next) => {
                     },
                     process.env.ACCESS_TOKEN_SECRET,
                     {
-                        expiresIn: '5m'
+                        expiresIn: '50m'
                     }
                 );
                 res.cookie('jwt', accessToken, { httpOnly: true, secure: true, maxAge: 60 * 1000 });
