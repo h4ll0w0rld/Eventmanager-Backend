@@ -2,6 +2,8 @@ const db = require("../models");
 const handleError = require("../services/error_service").handleErrors;
 const validationService = require("../services/validation_service");
 const permission_controller = require("./permission_controller");
+const inviteService = require('../services/invite_service');
+
 
 // create main Model
 const Event = db.event;
@@ -12,7 +14,7 @@ const Shift = db.shift;
 const UserEvent = db.userEvent;
 
 
- 
+
 
 
 const getAllUsersByEvent = async (req, res, next) => {
@@ -27,8 +29,8 @@ const getAllUsersByEvent = async (req, res, next) => {
             },
             order: [['lastName', 'ASC'], ['firstName', 'ASC'], ['emailAddress', 'ASC']],
         });
-      
-       
+
+
         res.status(200).send(users)
     } catch (error) {
         next(handleError(error, "eventController"));
@@ -78,6 +80,8 @@ const deleteEventById = async (req, res, next) => {
 }
 
 const addUserToEvent = async (req, res, next) => {
+
+    
     let eventId = req.params.current_event_id;
     let userId = req.params.user_id;
     try {
@@ -147,6 +151,51 @@ const removeUserFromEvent = async (req, res, next) => {
         next(handleError(error, "eventController"));
     }
 }
+// controllers/invite.controller.js
+
+const createInvite = async (req, res, next) => {
+    try {
+        const { id } = req.body;
+        const eventId = req.params.current_event_id;
+
+       
+
+        console.log("Creating invite for:", id, "to event:", eventId);
+        const invite = await inviteService.createInvite(eventId, id);
+        res.json(invite);
+    } catch (e) {
+        console.log("HEREEE", e);
+        next(e);
+    }
+};
+
+const validateInvite = async (req, res, next) => {
+    try {
+        const invite = await inviteService.validateInvite(req.params.token);
+        res.json(invite);
+    } catch (e) {
+        next(e);
+    }
+};
+
+const acceptInvite = async (req, res, next) => {
+  try {
+   // console.log("Accept invite called with body:", req);
+    const { token } = req.body;
+    //const userId = req.id; // from auth middleware
+
+    console.log("Accepting invite for user:", "with token:", req.body.currentUserId, token);
+
+    const result = await inviteService.acceptInvite(token, req.currentUserId);
+    res.json(result);
+
+  } catch (error) {
+    next(handleError(error, 'inviteController'));
+  }
+};
+
+
+
 
 
 
@@ -156,5 +205,8 @@ module.exports = {
     addEvent: addEvent,
     deleteEventById: deleteEventById,
     addUserToEvent: addUserToEvent,
-    removeUserFromEvent: removeUserFromEvent
+    removeUserFromEvent: removeUserFromEvent,
+    createInvite,
+    validateInvite,
+    acceptInvite
 }

@@ -12,6 +12,7 @@ module.exports = {
     DIALECT: 'mysql',
     TIMEZONE: '+01:00',
     OverwriteOnSync: false,
+    
 
 
 

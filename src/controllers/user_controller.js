@@ -87,17 +87,17 @@ const claimUser = async (req, res, next) => {
     let event_id = req.params.current_event_id;
     let user_id = req.params.user_id;
     let currentUserId = req.currentUserId;
-    let firstName = req.params.firstName;
-    let lastName = req.params.lastName;
+    // let firstName = req.params.firstName;
+    // let lastName = req.params.lastName;
     try {
         const userEvent = await validationService.isUserinEvent(user_id, event_id);
         const user = await validationService.isUserIDValid(user_id);
         if (user.emailAddress) {
             throw Object.assign(new Error('User already claimed!'), { statusCode: 400 });
         }
-        if (user.firstName !== firstName || user.lastName !== lastName) {
-            throw Object.assign(new Error('Name does not match!'), { statusCode: 400 });
-        }
+        // if (user.firstName !== firstName || user.lastName !== lastName) {
+        //     throw Object.assign(new Error('Name does not match!'), { statusCode: 400 });
+        // }
 
         await db.sequelize.transaction(async (t) => {
             if (!await UserEvent.findOne({ where: { UserId: currentUserId, EventId: event_id } })) {
