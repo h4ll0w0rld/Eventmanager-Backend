@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 
 
-router.get('/:current_event_id/isAdmin/user_id/:user_id', checkRole, permissionMiddleware.checkIsAdmin)
+router.get('/:current_event_id/isAdmin/user_id/:user_id', checkRole, permissionMiddleware.checkIsAdmin, permissionController.isAd);
 router.put('/:current_event_id/makeEditor/shift_category_id/:shift_category_id/user_id/:user_id', checkRole, permissionMiddleware.checkAdmin, permissionController.makeEditor);
 router.put('/:current_event_id/removeEditor/shift_category_id/:shift_category_id/user_id/:user_id', checkRole, permissionMiddleware.checkAdmin, permissionController.removeEditor);
 router.put('/:current_event_id/makeAdmin/user_id/:user_id', checkRole, permissionMiddleware.checkAdmin, permissionController.makeAdmin);

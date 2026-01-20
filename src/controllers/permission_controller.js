@@ -74,6 +74,10 @@ const checkAdmin = async (req, res, next) => {
   }
 };
 
+const isAd = (req,res) => {
+    res.status(200).send(true)
+}
+
 
 const isUserAdminInEvent = async (user_id, event_id) => {
   try {
@@ -134,5 +138,6 @@ module.exports = {
     makeAdmin,
     removeAdmin,
     getRoles,
-    checkAdmin
+    checkAdmin,
+    isAd
 }
