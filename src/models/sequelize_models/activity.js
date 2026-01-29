@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true
         },
         status: {
-            type: DataTypes.ENUM('free', 'requested', 'confirmed'),
+            type: DataTypes.ENUM('free', 'requested', 'confirmed', 'selfReq'),
             allowNull: false,
             defaultValue: 'free'
         },
@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+       
     })
 
     return Activity

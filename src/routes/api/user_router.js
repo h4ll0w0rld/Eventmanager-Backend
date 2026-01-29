@@ -11,5 +11,6 @@ router.delete('/delete/user_id/:user_id', permissionMiddleware.checkCurrentUser,
 router.get('/:current_event_id/id/:id', checkRole, permissionMiddleware.checkCurrentUserOrAdmin, userController.getUserById);
 router.post('/:current_event_id/add', checkRole, permissionMiddleware.checkAdmin, userController.addUser);
 router.get('/:current_event_id/claimUser/:user_id', userController.claimUser);
+router.put('/edit/user_id/:user_id', permissionMiddleware.checkCurrentUserOrAdmin, userController.editUserPhone);
 
 module.exports = router;

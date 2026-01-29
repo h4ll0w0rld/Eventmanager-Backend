@@ -30,8 +30,7 @@ const getAllUsersByEvent = async (req, res, next) => {
             order: [['lastName', 'ASC'], ['firstName', 'ASC'], ['emailAddress', 'ASC']],
         });
 
-
-        res.status(200).send(users)
+         res.status(200).send(users)
     } catch (error) {
         next(handleError(error, "eventController"));
     }

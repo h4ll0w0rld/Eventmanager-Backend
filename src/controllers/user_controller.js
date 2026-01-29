@@ -107,11 +107,53 @@ const claimUser = async (req, res, next) => {
             await UserEvent.destroy({ where: { UserId: user_id, EventId: event_id } }, { transaction: t });
             await User.destroy({ where: { id: user_id } }, { transaction: t });
         })
+
         res.status(204).send({ message: "successful claimed User" })
+
     } catch (error) {
         next(handleError(error, "userController"));
     }
 }
+
+const editUserPhone = async (req, res, next) => {
+    const user_id = req.params.user_id;
+    const currentUserId = req.currentUserId;
+    const { phone } = req.body;
+
+    try {
+        // 1. Validate user exists
+        const user = await validationService.isUserIDValid(user_id);
+
+        // 2. Permission check
+        if (user.id !== currentUserId) {
+            throw Object.assign(
+                new Error('Not allowed to edit this user'),
+                { statusCode: 403 }
+            );
+        }
+
+        // 3. Validate input
+        if (phone === undefined) {
+            throw Object.assign(
+                new Error('Phone number is required'),
+                { statusCode: 400 }
+            );
+        }
+
+        // 4. Update phone number only
+        await User.update(
+            { phone },
+            { where: { id: user_id } }
+        );
+
+        res.status(200).json({ message: 'Phone number updated successfully' });
+
+    } catch (error) {
+        next(handleError(error, "userController"));
+    }
+};
+
+
 
 
 module.exports = {
@@ -119,5 +161,6 @@ module.exports = {
     getEventsByUser: getEventsByUser,
     deleteUserById: deleteUserById,
     addUser: addUser,
-    claimUser: claimUser
+    claimUser: claimUser,
+    editUserPhone: editUserPhone
 }

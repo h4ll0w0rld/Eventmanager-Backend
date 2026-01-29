@@ -22,10 +22,16 @@ module.exports = (sequelize, DataTypes) => {
                 isEmail: true
             }
         },
+        phone: {
+            type: DataTypes.STRING(15),
+            allowNull: true
+        },
+
         password: {
             type: DataTypes.STRING,
             allowNull: true
         },
+
         refreshToken: {
             type: DataTypes.STRING,
             allowNull: true
