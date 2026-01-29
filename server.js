@@ -20,6 +20,7 @@ const userRoute = require('./src/routes/api/user_router');
 const eventRoute = require('./src/routes/api/event_router');
 const permissionRoute = require('./src/routes/api/permission_router');
 const errorHandling = require('./src/middleware/error_middleware');
+const adminNoteRoute = require('./src/routes/api/adminNote_router');
 
 
 
@@ -52,6 +53,7 @@ app.use('/logout', logoutRoute);
 app.use('/register', registerRoute);
 app.use('/auth', authRoute);
 app.use('/refresh', refreshRoute);
+app.use('/adminNote', adminNoteRoute);
 /*
 *******
 *******

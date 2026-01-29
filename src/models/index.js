@@ -1,4 +1,6 @@
 const dbConfig = require("../../config/dbConfig.js");
+const AdminNote = require('../models/sequelize_models/admin_note.js'); // ✅ make sure this exists
+
 const { Sequelize, DataTypes } = require("sequelize");
 
 const sequelize = new Sequelize(
@@ -32,7 +34,7 @@ db.user = require('./sequelize_models/user.js')(sequelize, DataTypes);
 db.shift_category = require('./sequelize_models/shift_category.js')(sequelize, DataTypes);
 db.shift = require('./sequelize_models/shift.js')(sequelize, DataTypes);
 db.activity = require('./sequelize_models/activity.js')(sequelize, DataTypes);
-
+db.adminNote = AdminNote(sequelize, DataTypes); // ✅ use the imported AdminNote model
 // InviteToken model
 db.inviteToken = require('./sequelize_models/invite_token.js')(sequelize, DataTypes); // <-- new
 
@@ -60,7 +62,10 @@ db.shift.hasMany(db.activity, { onDelete: 'cascade', foreignKey: { name: 'shift_
 db.activity.belongsTo(db.shift, { foreignKey: { name: 'shift_id', allowNull: false }, as: 'shift' });
 db.user.hasMany(db.activity, { onDelete: 'set null', foreignKey: { name: 'user_id', allowNull: true }, as: 'activities' });
 db.activity.belongsTo(db.user, { foreignKey: { name: 'user_id', allowNull: true }, as: 'user' });
+db.user.hasMany(db.adminNote, { foreignKey: "userId" });
+db.adminNote.belongsTo(db.user, { as: "user", foreignKey: "userId" });
 
+db.adminNote.belongsTo(db.user, { as: "admin", foreignKey: "adminId" });
 // Optional: Associate InviteToken to Event
 db.inviteToken.belongsTo(db.event, { foreignKey: 'eventId', as: 'event' });
 db.event.hasMany(db.inviteToken, { foreignKey: 'eventId', as: 'inviteTokens' });
