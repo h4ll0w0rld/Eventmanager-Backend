@@ -53,7 +53,6 @@ app.use('/logout', logoutRoute);
 app.use('/register', registerRoute);
 app.use('/auth', authRoute);
 app.use('/refresh', refreshRoute);
-app.use('/adminNote', adminNoteRoute);
 /*
 *******
 *******
@@ -71,6 +70,8 @@ app.use('/activity', activityRoute);
 app.use('/user', userRoute);
 app.use('/event', eventRoute);
 app.use('/permission', permissionRoute);
+app.use('/adminNote', adminNoteRoute);
+
 
 
 

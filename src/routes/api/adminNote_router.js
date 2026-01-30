@@ -1,33 +1,35 @@
 const permissionMiddleware = require('../../middleware/permission_middleware');
 const checkRole = require('../../middleware/checkRole_middleware').checkRole;
+const adminNotesController = require('../../controllers/adminNotes_controller');
+
 const express = require('express');
 const router = express.Router();
 
-const adminNotesController = require('../../controllers/adminNotes_controller'); // make sure file exists
+
 
 router.post(
-    '/users/:userId/admin-notes',
+    '/:current_event_id/users/:userId/admin-notes',
     checkRole,
     permissionMiddleware.checkAdmin,
     adminNotesController.createAdminNote
 );
 
 router.get(
-    '/users/:userId/admin-notes',
-    checkRole,
+    '/:current_event_id/users/:userId/admin-notes',
+     checkRole,
     permissionMiddleware.checkAdmin,
     adminNotesController.getAdminNotesForUser
 );
 
 router.patch(
-    '/admin-notes/:noteId',
+    '/:current_event_id/admin-notes/:noteId',
     checkRole,
     permissionMiddleware.checkAdmin,
     adminNotesController.updateAdminNote
 );
 
 router.delete(
-    '/admin-notes/:noteId',
+    '/:current_event_id/admin-notes/:noteId',
     checkRole,
     permissionMiddleware.checkAdmin,
     adminNotesController.deleteAdminNote

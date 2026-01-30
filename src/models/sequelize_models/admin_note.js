@@ -38,5 +38,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
+    
+
     return AdminNote;
 };

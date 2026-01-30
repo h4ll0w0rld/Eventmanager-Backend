@@ -30,6 +30,8 @@ const checkRole = async (req, res, next) => {
         req.roles = roles;
         next();
     } catch (error) {
+        console.log("----------------------------------------------------------------");
+        console.error("Error in checkRole middleware:", error);
         next(handleError(error, "checkRoleMiddleware"));
     }
 }

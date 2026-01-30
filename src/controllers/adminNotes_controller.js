@@ -1,5 +1,11 @@
-const { AdminNote, User } = require('../models');
+const db = require("../models");
 const handleError = require('../services/error_service').handleErrors;
+
+
+
+const AdminNote = db.adminNote;
+const User = db.user;
+
 
 // Create a new admin note for a user
 const createAdminNote = async (req, res, next) => {
@@ -8,11 +14,7 @@ const createAdminNote = async (req, res, next) => {
     const { note } = req.body;
     console.log("Creating admin note:", { userId, adminId, note });
     try {
-        // Only admins can create notes
-        const admin = await User.findByPk(adminId);
-        if (!admin || !admin.isAdmin) {
-            throw Object.assign(new Error('Admin privileges required'), { statusCode: 403 });
-        }
+        
 
         if (!note) {
             throw Object.assign(new Error('Note content is required'), { statusCode: 400 });
@@ -36,15 +38,12 @@ const getAdminNotesForUser = async (req, res, next) => {
     const requesterId = req.currentUserId;
 
     try {
-        const requester = await User.findByPk(requesterId);
-        if (!requester || !requester.isAdmin) {
-            throw Object.assign(new Error('Admin privileges required'), { statusCode: 403 });
-        }
+       
 
         const notes = await AdminNote.findAll({
             where: { userId },
             include: [
-                { model: User, as: 'admin', attributes: ['id', 'fName', 'lName', 'email'] }
+                { model: User, as: 'admin', attributes: ['id', 'firstName', 'lastName', 'emailAddress'] }
             ],
             order: [['createdAt', 'DESC']]
         });
@@ -62,11 +61,7 @@ const updateAdminNote = async (req, res, next) => {
     const { note } = req.body;
 
     try {
-        const admin = await User.findByPk(adminId);
-        if (!admin || !admin.isAdmin) {
-            throw Object.assign(new Error('Admin privileges required'), { statusCode: 403 });
-        }
-
+      
         const existingNote = await AdminNote.findByPk(noteId);
         if (!existingNote) {
             throw Object.assign(new Error('Admin note not found'), { statusCode: 404 });
@@ -90,10 +85,7 @@ const deleteAdminNote = async (req, res, next) => {
     const adminId = req.currentUserId;
 
     try {
-        const admin = await User.findByPk(adminId);
-        if (!admin || !admin.isAdmin) {
-            throw Object.assign(new Error('Admin privileges required'), { statusCode: 403 });
-        }
+      
 
         const deleted = await AdminNote.destroy({ where: { id: noteId } });
         if (!deleted) {
