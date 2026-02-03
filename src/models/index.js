@@ -34,7 +34,8 @@ db.user = require('./sequelize_models/user.js')(sequelize, DataTypes);
 db.shift_category = require('./sequelize_models/shift_category.js')(sequelize, DataTypes);
 db.shift = require('./sequelize_models/shift.js')(sequelize, DataTypes);
 db.activity = require('./sequelize_models/activity.js')(sequelize, DataTypes);
-db.adminNote = AdminNote(sequelize, DataTypes); // ✅ use the imported AdminNote model
+db.adminNote = AdminNote(sequelize, DataTypes); 
+db.adminNotification = require('./sequelize_models/admin_notification.js')(sequelize, DataTypes);
 // InviteToken model
 db.inviteToken = require('./sequelize_models/invite_token.js')(sequelize, DataTypes); // <-- new
 

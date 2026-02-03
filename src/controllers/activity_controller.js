@@ -8,6 +8,8 @@ const Shift = db.shift;
 const ShiftCategory = db.shift_category;
 const Event = db.event;
 const UserEvent = db.userEvent;
+const AdminNotification = db.adminNotification;
+
 
 const sequelize = db.Sequelize;
 
@@ -105,8 +107,10 @@ const confirmUserToActivity = async (req, res, next) => {
     let shift_category_id = req.params.shift_category_id;
     let event_id = req.params.current_event_id;
     let user_id = req.params.user_id;
+
     try {
         let activity = await validationService.isActivityInEvent(activity_id, shift_category_id, event_id);
+
         // check if user is in the same event
         let userEvent = await UserEvent.findOne({
             where: {
@@ -114,21 +118,36 @@ const confirmUserToActivity = async (req, res, next) => {
                 EventId: activity.shift.shift_category.event_id
             }
         });
+
         await validationService.isUserAvailable(user_id, activity_id);
+
         if (!userEvent) {
             throw Object.assign(new Error('User is not in the same Event!'), { statusCode: 400 });
         }
+
         if (activity.status === "confirmed") {
-            // if activity already has an user
             throw Object.assign(new Error('Activity already has an requested or confirmed user!'), { statusCode: 400 });
         } else {
+            // Confirm the user
             await activity.update({ user_id: user_id, status: "confirmed" });
-            res.status(204).send({ message: "successful confirmed User to Activity" })
+
+            await createAdminNotification({
+                userId: req.currentUserId, // user who did the action
+                eventId: event_id,
+                activityId: activity.id,
+                message: `User ${req.currentUserId} confirmed themselves for Activity ${activity.id}`
+            });
+            res.status(204).send({ message: "successful confirmed User to Activity" });
+
+          
+
+          
+
         }
     } catch (error) {
         next(handleError(error, "activityController"));
     }
-}
+};
 
 const requestUserToActivity = async (req, res, next) => {
     let activity_id = req.params.activity_id;
@@ -182,6 +201,15 @@ const removeUserFromActivity = async (req, res, next) => {
     }
 }
 
+const createAdminNotification = async ({ userId, eventId, activityId, message }) => {
+    console.log("Creating admin notification:", { userId, eventId, activityId, message });
+    try {
+        await AdminNotification.create({ userId, eventId, activityId, message });
+        console.log("Admin notification created successfully");
+    } catch (err) {
+        console.error("Failed to create admin notification", err);
+    }
+};
 
 
 
@@ -208,11 +236,39 @@ const getActivitiesByShiftCategory = async (req, res, next) => {
     }
 }
 
+const markShiftAsDone = async (req, res, next) => {
+    let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
+    let activity_id = req.params.activity_id;
+    console.log("MARK AS DONE FIRED")
 
+    try {
+        await validationService.isActivityInEvent(activity_id, shift_category_id, event_id);
+        await Activity.update({ shiftDone: true }, { where: { id: activity_id } });
+        const act = await Activity.findByPk(activity_id, { raw: true });
+        console.log("HHHIIIII", act);
+        res.status(204).send({ message: "successful marked Shift as Done" })
+    } catch (error) {
+        next(handleError(error, "activityController"));
+    }
+}
 
+const markShiftAsUndone = async (req, res, next) => {
+    let shift_category_id = req.params.shift_category_id;
+    let event_id = req.params.current_event_id;
+    let activity_id = req.params.activity_id;
+    console.log("MARK AS UNDONE FIRED")
 
-
-
+    try {
+        await validationService.isActivityInEvent(activity_id, shift_category_id, event_id);
+        await Activity.update({ shiftDone: false }, { where: { id: activity_id } });
+        const act = await Activity.findByPk(activity_id, { raw: true });
+        console.log("HHHIIIII UNDONE", act);
+        res.status(204).send({ message: "successful marked Shift as Undone" })
+    } catch (error) {
+        next(handleError(error, "activityController"));
+    }
+}
 
 
 module.exports = {
@@ -221,5 +277,7 @@ module.exports = {
     confirmUserToActivity: confirmUserToActivity,
     requestUserToActivity: requestUserToActivity,
     removeUserFromActivity: removeUserFromActivity,
-    getActivitiesByShiftCategory: getActivitiesByShiftCategory
+    getActivitiesByShiftCategory: getActivitiesByShiftCategory,
+    markShiftAsDone: markShiftAsDone,
+    markShiftAsUndone: markShiftAsUndone
 }

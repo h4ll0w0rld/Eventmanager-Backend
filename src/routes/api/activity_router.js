@@ -11,5 +11,7 @@ router.put('/:current_event_id/confirmUser/shift_category_id/:shift_category_id/
 router.put('/:current_event_id/requestUser/shift_category_id/:shift_category_id/activity_id/:activity_id/user_id/:user_id', checkRole, permissionMiddleware.checkUser, activityController.requestUserToActivity);
 router.put('/:current_event_id/removeUser/shift_category_id/:shift_category_id/activity_id/:activity_id', checkRole, permissionMiddleware.checkUser, activityController.removeUserFromActivity);
 router.get('/:current_event_id/all/shift_category_id/:shift_category_id', checkRole, permissionMiddleware.checkGuest, activityController.getActivitiesByShiftCategory);
+router.put('/:current_event_id/markShiftDone/shift_category_id/:shift_category_id/activity_id/:activity_id', checkRole, permissionMiddleware.checkEditor, activityController.markShiftAsDone);
+router.put('/:current_event_id/markShiftUndone/shift_category_id/:shift_category_id/activity_id/:activity_id', checkRole, permissionMiddleware.checkEditor, activityController.markShiftAsUndone);
 
 module.exports = router;

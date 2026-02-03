@@ -162,6 +162,9 @@ const getAllShiftCategoriesByEvent = async (req, res, next) => {
                         include: [{
                             model: Activity,
                             as: "activities",
+                            attributes: {
+                                include: ['shiftDone']
+                            },
                             include: [{
                                 model: User,
                                 as: "user",

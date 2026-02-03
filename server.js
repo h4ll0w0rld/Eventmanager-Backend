@@ -21,7 +21,7 @@ const eventRoute = require('./src/routes/api/event_router');
 const permissionRoute = require('./src/routes/api/permission_router');
 const errorHandling = require('./src/middleware/error_middleware');
 const adminNoteRoute = require('./src/routes/api/adminNote_router');
-
+const adminNotificationRoute = require('./src/routes/api/adminNotificationRoutes');
 
 
 
@@ -71,6 +71,7 @@ app.use('/user', userRoute);
 app.use('/event', eventRoute);
 app.use('/permission', permissionRoute);
 app.use('/adminNote', adminNoteRoute);
+app.use('/adminNotifications', adminNotificationRoute);
 
 
 
