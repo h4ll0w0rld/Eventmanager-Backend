@@ -130,12 +130,13 @@ const confirmUserToActivity = async (req, res, next) => {
         } else {
             // Confirm the user
             await activity.update({ user_id: user_id, status: "confirmed" });
-
+           
+            let user = await User.findByPk(user_id);
             await createAdminNotification({
                 userId: req.currentUserId, // user who did the action
                 eventId: event_id,
                 activityId: activity.id,
-                message: `User ${req.currentUserId} confirmed themselves for Activity ${activity.id}`
+                message: ` ${user.firstName} ${user.lastName} hat die ${activity.shift.shift_category.name} Schicht bestätigt`
             });
             res.status(204).send({ message: "successful confirmed User to Activity" });
 
@@ -195,6 +196,14 @@ const removeUserFromActivity = async (req, res, next) => {
             throw Object.assign(new Error('Forbidden'), { statusCode: 403 });
         }
         await Activity.update({ user_id: null, status: "free" }, { where: { id: activity_id } })
+        
+        let user = await User.findByPk(activity.user_id);
+        await createAdminNotification({
+            userId: req.currentUserId, // user who did the action
+            eventId: event_id,
+            activityId: activity_id,
+            message: ` ${user.firstName} ${user.lastName} hat die ${activity.shift.shift_category.name} Schicht abgelehnt`
+        });
         res.status(204).send({ message: "successful deleted User from Activity" })
     } catch (error) {
         next(handleError(error, "activityController"));
@@ -205,7 +214,6 @@ const createAdminNotification = async ({ userId, eventId, activityId, message })
     console.log("Creating admin notification:", { userId, eventId, activityId, message });
     try {
         await AdminNotification.create({ userId, eventId, activityId, message });
-        console.log("Admin notification created successfully");
     } catch (err) {
         console.error("Failed to create admin notification", err);
     }
