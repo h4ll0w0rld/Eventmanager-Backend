@@ -477,18 +477,18 @@ const isDayinEvent = (day, event) => {
 
 // checks if time range is divisible by intervall
 const isTimeRangeDivisibleByIntervall = (startTime, endTime, intervall) => {
-    try {
-        const startMoment = moment(startTime, 'YYYY-MM-DD HH:mm', true);
-        const endMoment = moment(endTime, 'YYYY-MM-DD HH:mm', true);
-        const duration = endMoment.diff(startMoment, 'minutes');
-        if (duration % intervall === 0) {
-            return true;
-        } else {
-            throw Object.assign(new Error("Time range is not divisible by intervall"), { statusCode: 400 });
-        }
-    } catch (err) {
-        throw handleError(err, "validationService");
-    }
+    // try {
+    //     const startMoment = moment(startTime, 'YYYY-MM-DD HH:mm', true);
+    //     const endMoment = moment(endTime, 'YYYY-MM-DD HH:mm', true);
+    //     const duration = endMoment.diff(startMoment, 'minutes');
+    //     if (duration % intervall === 0) {
+    //         return true;
+    //     } else {
+    //         throw Object.assign(new Error("Time range is not divisible by intervall"), { statusCode: 400 });
+    //     }
+    // } catch (err) {
+    //     throw handleError(err, "validationService");
+    // }
 }
 
 // checks if startTime is before endTime

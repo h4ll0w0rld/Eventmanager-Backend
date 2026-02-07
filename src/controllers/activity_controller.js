@@ -130,7 +130,7 @@ const confirmUserToActivity = async (req, res, next) => {
         } else {
             // Confirm the user
             await activity.update({ user_id: user_id, status: "confirmed" });
-           
+
             let user = await User.findByPk(user_id);
             await createAdminNotification({
                 userId: req.currentUserId, // user who did the action
@@ -140,9 +140,9 @@ const confirmUserToActivity = async (req, res, next) => {
             });
             res.status(204).send({ message: "successful confirmed User to Activity" });
 
-          
 
-          
+
+
 
         }
     } catch (error) {
@@ -157,10 +157,12 @@ const requestUserToActivity = async (req, res, next) => {
     let user_id = req.params.user_id;
     try {
         let activity = await validationService.isActivityInEvent(activity_id, shift_category_id, event_id);
-        if (activity.user_id !== req.currentUserId && !req.roles.admin && !req.roles.editor.includes(parseInt(shift_category_id))) {
-            throw Object.assign(new Error('Forbidden'), { statusCode: 403 });
-        }
-        // check if user is in the same event
+        // if (activity.user_id !== req.currentUserId ) {      //removed: && !req.roles.admin && !req.roles.editor.includes(parseInt(shift_category_id))
+        //     console.log("USER ID:", req.currentUserId, "ACTIVITY USER ID:", activity.user_id, "ROLES:", req.roles);
+        //     throw Object.assign(new Error('Forbidden'), { statusCode: 403 });
+        // }
+        // // check if user is in the same event
+        console.log("USER ID:", req.currentUserId, "ACTIVITY USER ID:", activity.user_id, "ROLES:", req.roles);
         let userEvent = await UserEvent.findOne({
             where: {
                 UserId: user_id,
@@ -171,12 +173,27 @@ const requestUserToActivity = async (req, res, next) => {
         if (!userEvent) {
             throw Object.assign(new Error('User is not in the same Event!'), { statusCode: 400 });
         }
-        if (activity.status === "confirmed" || activity.status === "requested") {
+        if (activity.status === "confirmed" || activity.status === "requested" || activity.status === "selfReq") {
             // if activity already has an user
             throw Object.assign(new Error('Activity already has an requested or confirmed user!'), { statusCode: 400 });
         } else {
             await validationService.isUserAvailable(user_id, activity_id);
-            await activity.update({ user_id: user_id, status: "requested" });
+            console.log("Requesting user for activity:", req.roles.admin);
+            if (req.roles.admin) {
+                console.log("Admin request - auto-confirming user");
+                await activity.update({ user_id: user_id, status: "requested" });
+            } else {
+                console.log("Regular user request - setting status to selfReq");
+                await activity.update({ user_id: user_id, status: "selfReq" });
+            }
+            let user = await User.findByPk(activity.user_id);
+
+            await createAdminNotification({
+                userId: req.currentUserId, // user who did the action
+                eventId: event_id,
+                activityId: activity_id,
+                message: ` ${user.firstName} ${user.lastName} hat die ${activity.shift.shift_category.name} Schicht angefragt`
+            });
             res.status(204).send({ message: "successful requestet User for Activity" })
         }
     } catch (error) {
@@ -196,7 +213,7 @@ const removeUserFromActivity = async (req, res, next) => {
             throw Object.assign(new Error('Forbidden'), { statusCode: 403 });
         }
         await Activity.update({ user_id: null, status: "free" }, { where: { id: activity_id } })
-        
+
         let user = await User.findByPk(activity.user_id);
         await createAdminNotification({
             userId: req.currentUserId, // user who did the action

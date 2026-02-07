@@ -36,6 +36,7 @@ db.shift = require('./sequelize_models/shift.js')(sequelize, DataTypes);
 db.activity = require('./sequelize_models/activity.js')(sequelize, DataTypes);
 db.adminNote = AdminNote(sequelize, DataTypes); 
 db.adminNotification = require('./sequelize_models/admin_notification.js')(sequelize, DataTypes);
+db.feedback = require('./sequelize_models/feedback.js')(sequelize, DataTypes);
 // InviteToken model
 db.inviteToken = require('./sequelize_models/invite_token.js')(sequelize, DataTypes); // <-- new
 

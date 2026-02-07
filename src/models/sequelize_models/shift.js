@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
                 return moment(this.getDataValue('endTime')).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm');
             }
         },
+        isLeader: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        }
         // isActive: {
         //     type: DataTypes.BOOLEAN,
         //     allowNull: false,

@@ -85,7 +85,6 @@ const deleteShiftById = async (req, res, next) => {
 // GET all Shifts by User
 
 const getShiftsByUserAndEvent = async (req, res, next) => {
-    console.log("FIRE")
     let user_id = req.params.user_id;
     let event_id = req.params.current_event_id;
     let status = req.params.status;
@@ -164,6 +163,46 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
     }
 }
 
+const getSelfReqShifts = async (req, res, next) => {
+  const event_id = req.params.current_event_id;
+
+  try {
+    const shifts = await Shift.findAll({
+      include: [
+        {
+          model: Activity,
+          as: "activities",
+          required: true, // important: makes it an INNER JOIN so filtering actually works
+          where: { status: "selfReq" },
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["id", "firstName", "lastName"],
+            },
+          ],
+        },
+        {
+          model: ShiftCategory,
+          as: "shift_category",
+          required: true,
+        },
+      ],
+      where: {
+        "$shift_category.event_id$": event_id,
+      },
+      order: [
+        ["startTime", "ASC"],
+      ],
+    });
+
+    return res.status(200).send(shifts);
+  } catch (error) {
+    next(handleError(error, "shiftController"));
+  }
+};
+
+
 
 
 
@@ -174,45 +213,88 @@ const getShiftsByUserAndEvent = async (req, res, next) => {
 
 const getShiftArray = (shiftBlocks) => {
     let shiftArray = [];
+    if(shiftBlocks.length > 30){
+        throw Object.assign(new Error('Too many shift blocks provided. Maximum allowed is 30.'), { statusCode: 400 });
+    }
     try {
-        shiftBlocks.forEach(shiftBlock => {
-            const intervall = shiftBlock.intervall;
-            const activitiesPerShift = shiftBlock.activitiesPerShift;
-            const numberOfShifts = shiftBlock.numberOfShifts;
-            const startTime = shiftBlock.startTime;
-            const endTime = shiftBlock.endTime;
-            for (let i = 0; i < numberOfShifts; i++) {
-                const shiftStartTime = moment(startTime, 'YYYY-MM-DD HH:mm', true).add(intervall * i, 'minutes').format('YYYY-MM-DD HH:mm');
-                const shiftEndTime = moment(shiftStartTime, 'YYYY-MM-DD HH:mm', true).add(intervall, 'minutes').format('YYYY-MM-DD HH:mm');
-                let shift = {
-                    startTime: shiftStartTime,
-                    endTime: shiftEndTime,
-                    activities: []
+        shiftBlocks.forEach(block => {
+            block.shiftTypes.forEach(type => {
+                const {
+                    interval,
+                    numberOfShifts,
+                    activitiesPerShift,
+                    isLeader = false,
+                    startTimeOverride
+                } = type;
+
+                const baseStartTime = startTimeOverride || block.startTime;
+
+                for (let i = 0; i < numberOfShifts; i++) {
+                    const start = moment(baseStartTime)
+                        .add(interval * i, 'minutes');
+
+                    const end = moment(start).add(interval, 'minutes');
+
+                    shiftArray.push({
+                        startTime: start.format('YYYY-MM-DD HH:mm'),
+                        endTime: end.format('YYYY-MM-DD HH:mm'),
+                        isLeader,
+                        activities: Array.from(
+                            { length: activitiesPerShift },
+                            () => ({})
+                        )
+                    });
                 }
-                // check if the given endTime matches the numberofShifts
-                if (i === (numberOfShifts - 1) && shift.endTime !== endTime) {
-                    console.log(shift);
-                    throw Object.assign(new Error('Shifts do not match the given time range!'), { statusCode: 400 });
-                }
-                //adding the activities to the shift
-                for (let j = 0; j < activitiesPerShift; j++) {
-                    shift.activities.push({})
-                }
-                //add the shift to the array of shifts
-                shiftArray.push(shift);
-            }
-        })
+            });
+        });
+
+        // 🔥 LEADER OVERLAP VALIDATION
+        validateLeaderOverlaps(shiftArray);
+
         return shiftArray;
+
     } catch (error) {
         throw handleError(error, "shiftController");
     }
-}
+};
 
+const validateLeaderOverlaps = (shifts) => {
+    const leaderShifts = shifts
+        .filter(s => s.isLeader)
+        .sort((a, b) =>
+            moment(a.startTime).diff(moment(b.startTime))
+        );
+
+    for (let i = 1; i < leaderShifts.length; i++) {
+        const prev = leaderShifts[i - 1];
+        const curr = leaderShifts[i];
+
+        if (
+            moment(curr.startTime).isBefore(moment(prev.endTime))
+        ) {
+            throw Object.assign(
+                new Error(
+                    `Leader shifts overlap:
+                     ${prev.startTime} - ${prev.endTime}
+                     overlaps with
+                     ${curr.startTime} - ${curr.endTime}`
+                ),
+                { statusCode: 400 }
+            );
+        }
+    }
+};
+
+const hasOverlap = (a, b) => {
+    return moment(a.startTime).isBefore(moment(b.endTime)) &&
+           moment(b.startTime).isBefore(moment(a.endTime));
+};
 
 module.exports = {
     getAllShifts: getAllShifts,
     getShiftById: getShiftById,
     deleteShiftById: deleteShiftById,
     getShiftsByUserAndEvent: getShiftsByUserAndEvent,
-    getShiftArray: getShiftArray
+    getShiftArray: getShiftArray,
+    getSelfReqShifts: getSelfReqShifts
 }

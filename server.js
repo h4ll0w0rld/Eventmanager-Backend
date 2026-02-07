@@ -22,6 +22,7 @@ const permissionRoute = require('./src/routes/api/permission_router');
 const errorHandling = require('./src/middleware/error_middleware');
 const adminNoteRoute = require('./src/routes/api/adminNote_router');
 const adminNotificationRoute = require('./src/routes/api/adminNotificationRoutes');
+const feedbackRoute = require('./src/routes/api/feedback-router');
 
 
 
@@ -53,6 +54,7 @@ app.use('/logout', logoutRoute);
 app.use('/register', registerRoute);
 app.use('/auth', authRoute);
 app.use('/refresh', refreshRoute);
+app.use('/feedback', feedbackRoute);
 /*
 *******
 *******
