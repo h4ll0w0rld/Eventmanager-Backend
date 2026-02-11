@@ -12,5 +12,5 @@ router.delete('/:current_event_id/shift_category_id/:shift_category_id/shift_id/
 router.get('/:current_event_id/ShiftsByUser/status/:status/user_id/:user_id', checkRole, permissionMiddleware.checkCurrentUserOrAdmin, shiftController.getShiftsByUserAndEvent);
 router.get('/:current_event_id/shifts-selfreq', checkRole, permissionMiddleware.checkAdmin, shiftController.getSelfReqShifts
 );
-
+//HI
 module.exports = router;
