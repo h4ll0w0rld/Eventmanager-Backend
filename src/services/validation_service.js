@@ -332,7 +332,7 @@ const areShiftBlocksValid = (shiftBlocks, event) => {
             isTimeValid(shiftBlock.startTime);
             isTimeValid(shiftBlock.endTime);
             isTimeRangeValid(shiftBlock.startTime, shiftBlock.endTime);
-            isTimeRangeDivisibleByIntervall(shiftBlock.startTime, shiftBlock.endTime, shiftBlock.intervall);
+            //isTimeRangeDivisibleByIntervall(shiftBlock.startTime, shiftBlock.endTime, shiftBlock.intervall);
             isDayinEvent(shiftBlock.startTime, event);
             isDayinEvent(shiftBlock.endTime, event);
 
@@ -389,6 +389,7 @@ const isShiftCategoryIDValid = async (id) => {
             return shiftCategory;
         }
     } catch (error) {
+        console.log(error, "shiftCategoryID not valid");
         throw handleError(error, "validationService");
     }
 }
@@ -476,7 +477,7 @@ const isDayinEvent = (day, event) => {
 
 
 // checks if time range is divisible by intervall
-const isTimeRangeDivisibleByIntervall = (startTime, endTime, intervall) => {
+//const isTimeRangeDivisibleByIntervall = (startTime, endTime, intervall) => {
     // try {
     //     const startMoment = moment(startTime, 'YYYY-MM-DD HH:mm', true);
     //     const endMoment = moment(endTime, 'YYYY-MM-DD HH:mm', true);
@@ -489,7 +490,7 @@ const isTimeRangeDivisibleByIntervall = (startTime, endTime, intervall) => {
     // } catch (err) {
     //     throw handleError(err, "validationService");
     // }
-}
+//}
 
 // checks if startTime is before endTime
 const isTimeRangeValid = (startTime, endTime) => {
